@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Will&#39;X Blog</title>
+    <description>SE@SJTU 会一点C++/Go/Python/C/Java/Scheme 对分布式/机器学习感兴趣 编程/平面设计/美</description>
+    <link>http://willx8.github.io/</link>
+    <atom:link href="http://willx8.github.io/feed.xml" rel="self" type="application/rss+xml" />
+    <pubDate>Sun, 31 Jan 2016 16:33:31 +0800</pubDate>
+    <lastBuildDate>Sun, 31 Jan 2016 16:33:31 +0800</lastBuildDate>
+    <generator>Jekyll v3.0.2</generator>
+    
+      <item>
+        <title> Hello 2016 &amp; Winter Vacation</title>
+        <description>&lt;blockquote&gt;
+  &lt;p&gt;“Let there be my blog. “&lt;br /&gt;
+&lt;!--more--&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;h1 id=&quot;section&quot;&gt;搭好博客啦&lt;/h1&gt;
+&lt;p&gt;今天冷得不想出门。（好吧其实是女朋友去霓虹玩了）&lt;/p&gt;
+
+&lt;p&gt;终于搭好Jekyll的Blog，~~也就是git clone了一个模板，~~准备开始在上面写东西记录一下自己做的事情了。&lt;/p&gt;
+
+&lt;p&gt;这里是&lt;a href=&quot;https://pages.github.com/&quot;&gt;GitHub Pages&lt;/a&gt; + &lt;a href=&quot;http://jekyllrb.com/&quot;&gt;Jekyll&lt;/a&gt; 快速 Building Blog 的技术方案。模板地址在页脚。&lt;/p&gt;
+
+&lt;p&gt;顺便，现在是&lt;strong&gt;2016-01-31&lt;/strong&gt;，不知为何如果把时间调成现在这篇post会显示不出来，我猜是时区的锅。&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;h1 id=&quot;section-1&quot;&gt;寒假里准备做的三件小事&lt;/h1&gt;
+
+&lt;h3 id=&quot;sicp&quot;&gt;1. 读SICP&lt;/h3&gt;
+&lt;p&gt;入了英文版的&lt;strong&gt;Structure and Interpretation of Computer Programs&lt;/strong&gt;，开始读啦。&lt;/p&gt;
+
+&lt;p&gt;在这之前，先要装一下&lt;strong&gt;scheme&lt;/strong&gt;。我选择了brew install mit-scheme，然后报需要XQuartz，于是去装XQuartz。觉得下得太慢，就想git clone aria2装个&lt;strong&gt;aria2&lt;/strong&gt;，折腾了一会儿觉得github下载太慢，因为终端不能连shadowsocks，于是上网搜了下，装了&lt;strong&gt;proxychains4&lt;/strong&gt;。OSX 10.11需要去掉系统完整性保护SIP，又要重启-cmd+R-进入终端-csrutil disable，再重启，重新装proxychains4，完成…&lt;/p&gt;
+
+&lt;p&gt;接着，我觉得aria2 terminal太麻烦，换了aria2 Web GUI.&lt;/p&gt;
+
+&lt;p&gt;最后，我觉得brew install太麻烦，下载了mit-scheme-9.2-x86-64.dmg.&lt;/p&gt;
+
+&lt;p&gt;收获是用上了&lt;strong&gt;iTerm&lt;/strong&gt;和&lt;strong&gt;proxychains4&lt;/strong&gt;.&lt;/p&gt;
+
+&lt;h3 id=&quot;mit6824&quot;&gt;2. 跟MIT6.824&lt;/h3&gt;
+&lt;p&gt;这是一门分布式系统的课，因为下学期要和小伙伴合作做一个项目了，先学习一个。&lt;br /&gt;
+现在做完了Lab1和Lab2 Part A，学习了一下&lt;strong&gt;Go&lt;/strong&gt;，goroutine和Thread相比还是很不一样的。&lt;/p&gt;
+
+&lt;p&gt;其中Lab1做的是MapReduce，填完代码跑过所有测试后觉得还是没有用到很多Google那篇论文里的内容。蛮tricky的一个部分是最后的fault-tolerant worker里最后一个case需要不停地用goroutine监听register，同时一边让worker跑map/reduce。不然很快所有worker都会fail。&lt;/p&gt;
+
+&lt;p&gt;重写了两次master.go的代码，感觉最后一版简洁舒服多了。原来设计成iterate through all jobs and assign them to workers in a new gorouine.后来改成create a goroutine for each worker, who retrieves job from joblist every time it finishes a job.效率提高不上，也增加了代码重用率。不过我没有让map&amp;amp;reduce同时进行，而是先让所有worker do map，再一起do reduce，是可以改进的地方。&lt;/p&gt;
+
+&lt;p&gt;等Lab2写完再一起更。&lt;br /&gt;
+*   aa&lt;br /&gt;
+*   aa&lt;br /&gt;
+*   sdad&lt;/p&gt;
+
+&lt;h3 id=&quot;ssc&quot;&gt;3. 写两个&lt;s&gt;可能烂尾的&lt;/s&gt;C++贪吃蛇&lt;/h3&gt;
+&lt;p&gt;看到一种说法，自己写几个项目(from scratch)是挺有必要的，是练习语言的好机会。而且，能在写的过程中学习设计模式、 版本控制等等，这是写大作业核心代码比不了的。&lt;/p&gt;
+
+&lt;p&gt;以为然。&lt;br /&gt;
+第一个用ncurses写的，命令行版。&lt;br /&gt;
+第二个用Qt写，GUI版。本以为命令行版的画图和核心程序算是分开了，只要改一下画图部分就行。后来还是重新学习了一下Qt，原来的&lt;thread&gt;也换成了&lt;qthread&gt;，甚至把核心程序（算是Model吧）的类也继承QObject了，最后改得面目全非，觉得设计模式太丑，心累地搁置了。&lt;/qthread&gt;&lt;/thread&gt;&lt;/p&gt;
+
+&lt;s&gt;插旗：过几天一定再改！&lt;/s&gt;
+
+&lt;hr /&gt;
+
+&lt;h2 id=&quot;section-2&quot;&gt;最后&lt;/h2&gt;
+&lt;p&gt;希望我的小笨蛋平安回来。&lt;/p&gt;
+
+&lt;p&gt;夹着一月的尾巴：&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;Hello 2016~&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;center&gt; --William 2016.1.31 &lt;/center&gt;
+
+</description>
+        <pubDate>Sat, 30 Jan 2016 22:35:00 +0800</pubDate>
+        <link>http://willx8.github.io/2016/01/30/hello-2016/</link>
+        <guid isPermaLink="true">http://willx8.github.io/2016/01/30/hello-2016/</guid>
+        
+        <category>生活</category>
+        
+        <category>寒假</category>
+        
+        
+      </item>
+    
+  </channel>
+</rss>

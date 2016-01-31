@@ -1,0 +1,76 @@
+---
+layout:     post
+title:      " Hello 2016 & Winter Vacation"
+date:       2016-01-30 14:35:00
+author:     "William"
+header-img: "img/post-bg-2016.jpg"
+excerpt_separator: <!--more-->
+tags:
+    - 生活
+    - 寒假
+---
+
+> "Let there be my blog. "
+<!--more-->
+
+
+# 搭好博客啦
+今天冷得不想出门。（好吧其实是女朋友去霓虹玩了）
+
+终于搭好Jekyll的Blog，~~也就是git clone了一个模板，~~准备开始在上面写东西记录一下自己做的事情了。
+
+这里是[GitHub Pages](https://pages.github.com/) + [Jekyll](http://jekyllrb.com/) 快速 Building Blog 的技术方案。模板地址在页脚。
+
+顺便，现在是**2016-01-31**，不知为何如果把时间调成现在这篇post会显示不出来，我猜是时区的锅。
+
+---
+
+# 寒假里准备做的三件小事
+
+
+### 1. 读SICP
+入了英文版的**Structure and Interpretation of Computer Programs**，开始读啦。
+
+在这之前，先要装一下**scheme**。我选择了brew install mit-scheme，然后报需要XQuartz，于是去装XQuartz。觉得下得太慢，就想git clone aria2装个**aria2**，折腾了一会儿觉得github下载太慢，因为终端不能连shadowsocks，于是上网搜了下，装了**proxychains4**。OSX 10.11需要去掉系统完整性保护SIP，又要重启-cmd+R-进入终端-csrutil disable，再重启，重新装proxychains4，完成...
+
+接着，我觉得aria2 terminal太麻烦，换了aria2 Web GUI.
+
+最后，我觉得brew install太麻烦，下载了mit-scheme-9.2-x86-64.dmg.
+
+收获是用上了**iTerm**和**proxychains4**.
+
+### 2. 跟MIT6.824
+这是一门分布式系统的课，因为下学期要和小伙伴合作做一个项目了，先学习一个。
+现在做完了Lab1和Lab2 Part A，学习了一下**Go**，goroutine和Thread相比还是很不一样的。
+
+其中Lab1做的是MapReduce，填完代码跑过所有测试后觉得还是没有用到很多Google那篇论文里的内容。蛮tricky的一个部分是最后的fault-tolerant worker里最后一个case需要不停地用goroutine监听register，同时一边让worker跑map/reduce。不然很快所有worker都会fail。
+
+重写了两次master.go的代码，感觉最后一版简洁舒服多了。原来设计成iterate through all jobs and assign them to workers in a new gorouine.后来改成create a goroutine for each worker, who retrieves job from joblist every time it finishes a job.效率提高不上，也增加了代码重用率。不过我没有让map&reduce同时进行，而是先让所有worker do map，再一起do reduce，是可以改进的地方。
+
+等Lab2写完再一起更。
+*   aa
+*   aa
+*   sdad
+
+### 3. 写两个<s>可能烂尾的</s>C++贪吃蛇
+看到一种说法，自己写几个项目(from scratch)是挺有必要的，是练习语言的好机会。而且，能在写的过程中学习设计模式、 版本控制等等，这是写大作业核心代码比不了的。
+
+以为然。
+第一个用ncurses写的，命令行版。
+第二个用Qt写，GUI版。本以为命令行版的画图和核心程序算是分开了，只要改一下画图部分就行。后来还是重新学习了一下Qt，原来的<thread>也换成了<QThread>，甚至把核心程序（算是Model吧）的类也继承QObject了，最后改得面目全非，觉得设计模式太丑，心累地搁置了。
+
+<s>插旗：过几天一定再改！</s>
+
+---
+
+
+## 最后
+希望我的小笨蛋平安回来。
+
+夹着一月的尾巴：
+
+>Hello 2016~
+
+
+<center> --William 2016.1.31 </center>
+
