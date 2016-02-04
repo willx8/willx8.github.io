@@ -30,22 +30,22 @@ Exercise 1.5可以看到两种方式(applicative-order evaluation & normal-order
 ### Exercise 1.5.
 Ben Bitdiddle has invented a test to determine whether the interpreter he is faced with is using applicative-order evaluation or normal-order evaluation. He defines the following two procedures:
 
-```scheme
+{% highlight scheme %}
 (define (p) (p))
 
 (define (test x y)
   (if (= x 0)
       0
       y))
-```
+{% endhighlight %}
 
 Then he evaluates the expression
 
-```scheme
+{% highlight scheme %}
 (test 0 (p))
-```
+{% endhighlight %}
 
-What behavior will Ben observe with an interpreter that uses applicative-order evaluation? What behavior will he observe with an interpreter that uses normal-order evaluation? Explain your answer. (Assume that the evaluation rule for the special form if is the same whether the interpreter is using normal or applicative order: The predicate expression is evaluated first, and the result determines whether to evaluate the consequent or the alternative expression.)
+What behavior will Ben observe with an interpreter that uses *applicative-order* evaluation? What behavior will he observe with an interpreter that uses *normal-order* evaluation? Explain your answer. (Assume that the evaluation rule for the special form if is the same whether the interpreter is using normal or applicative order: The predicate expression is evaluated first, and the result determines whether to evaluate the consequent or the alternative expression.)
 
 ### Solution 1.5.
 * If an interpreter uses normal-order evaluation:
@@ -58,39 +58,40 @@ What behavior will Ben observe with an interpreter that uses applicative-order e
 下面关于new-if的题可以和上面这道连起来看：
 
 ### Exercise 1.6.
-Alyssa P. Hacker doesn't see why if needs to be provided as a special form. ``Why can't I just define it as an ordinary procedure in terms of cond?'' she asks. Alyssa's friend Eva Lu Ator claims this can indeed be done, and she defines a new version of if:
+Alyssa P. Hacker doesn't see why if needs to be provided as a special form. "Why can't I just define it as an ordinary procedure in terms of cond?" she asks. Alyssa's friend Eva Lu Ator claims this can indeed be done, and she defines a new version of if:
 
-```scheme
+{% highlight scheme %}
 (define (new-if predicate then-clause else-clause)
   (cond (predicate then-clause)
         (else else-clause)))
-```
+{% endhighlight %}
 
 Eva demonstrates the program for Alyssa:
 
-```scheme
+{% highlight scheme %}
 (new-if (= 2 3) 0 5)
 5
 
 (new-if (= 1 1) 0 5)
 0
-```
+{% endhighlight %}
 
 Delighted, Alyssa uses new-if to rewrite the square-root program:
 
-```scheme
+{% highlight scheme %}
 (define (sqrt-iter guess x)
   (new-if (good-enough? guess x)
           guess
           (sqrt-iter (improve guess x)
                      x)))
-```
+{% endhighlight %}
+
 What happens when Alyssa attempts to use this to compute square roots? Explain.
 
 ### Solution 1.6.
 Since our interpreter uses applicative-order evaluation, new-if is interpreted later than \<else-clause\>. The interpreter evaluates \<predicate expression\>. Then it evaluates \<else-clause\>: we have `(improve guess x)` evaluated first, call it `y1` , then `sqrt-iter` evaluated:
 
-```scheme
+{% highlight scheme %}
 (define (sqrt-iter guess x)
   (new-if <some-evaluated-value>
           guess
@@ -98,14 +99,15 @@ Since our interpreter uses applicative-order evaluation, new-if is interpreted l
           		guess
 	          	(sqrt-iter (improve y0 x)
                      		x)))))
-```
+{% endhighlight %}
 Since no branch decision is made due to the late-evaluation of `new-if`, there will be an infinite substition of `sqrt-iter`.
 
 ---
 
 # 2.花式斐波那契
-1.2.4的练习题很巧妙
-一步一步地引到1.19上，教你把一次求斐波那契数列下一项的过程看做一次变换*T*，如果找到等价于运用两次变换*T*的变换*T'*，由于找到了*T*的“平方”，就可以像快速幂一样用O(log n)的速度求出答案。而*T*实际就是矩阵乘法，所谓两次*T*变换就是矩阵的平方。所以这题也可以看成是矩阵乘法的“快速幂”。看题：
+1.2.4的练习题组很巧妙。一步步引到1.19上，教你把一次求斐波那契数列下一项的过程看做一次变换*T*，如果找到等价于运用两次变换*T*的变换*T'*，由于找到了*T*的“平方”，就可以像快速幂一样用O(log n)的速度求出答案。
+
+而*T*实际就是矩阵乘法，所谓两次*T*变换就是矩阵的平方。所以这题也可以看成是矩阵乘法的“快速幂”。看题：
 
 ### Exercies 1.19.
 
@@ -115,7 +117,7 @@ Recall the transformation of the state variables *a* and *b* in the <tt>fib-iter
 
 Show that if we apply such a transformation <em>T</em><sub><em>p</em><em>q</em></sub> twice, the effect is the same as using a single transformation *T<sub>p'q'</sub>* of the same form, and compute <em>p</em>' and <em>q</em>' in terms of <em>p</em> and <em>q</em>.  This gives us an explicit way to square these transformations, and thus we can compute <em>T</em><sup><em>n</em></sup> using successive squaring, as in the <tt>fast-expt</tt> procedure.  Put this all together to complete the following procedure, which runs in a logarithmic number of steps:
 
-```scheme
+{% highlight scheme %}
 (define (fib n)
   (fib-iter 1 0 0 1 n))
 (define (fib-iter a b p q count)
@@ -131,19 +133,19 @@ Show that if we apply such a transformation <em>T</em><sub><em>p</em><em>q</em><
                         p
                         q
                         (- count 1)))))
-```
+{% endhighlight %}
 
 ### Solution 1.19.
 
 Notice that:
 
 <math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
-<mrow><mfenced open='(' close=')'><mtable><mtr><mtd><mrow><mi>p</mi><mo>+</mo><mi>q</mi></mrow></mtd><mtd><mrow><mi>q</mi></mrow></mtd></mtr><mtr><mtd><mrow></mrow></mtd></mtr><mtr><mtd><mrow></mrow></mtd></mtr><mtr><mtd><mrow><mi>r</mi><mi>q</mi></mrow></mtd><mtd><mrow><mi>p</mi></mrow></mtd></mtr></mtable></mfenced><mfenced><mfrac linethickness="0"><mrow><mrow><msub><mrow><mi>a</mi></mrow><mrow><mrow><mi>n</mi></mrow></mrow></msub></mrow></mrow><mrow><mrow><msub><mrow><mi>b</mi></mrow><mrow><mrow><mi>n</mi></mrow></mrow></msub></mrow></mrow></mfrac></mfenced><mo>=</mo><mfenced><mfrac linethickness="0"><mrow><mrow><msub><mrow><mi>a</mi></mrow><mrow><mrow><mi>n</mi></mrow></mrow></msub><mo>(</mo><mi>p</mi><mo>+</mo><mi>q</mi><mo>)</mo><mo>+</mo><msub><mrow><mi>b</mi></mrow><mrow><mrow><mi>n</mi></mrow></mrow></msub><mi>q</mi></mrow></mrow><mrow><mrow><msub><mrow><mi>a</mi></mrow><mrow><mrow><mi>n</mi></mrow></mrow></msub><mi>q</mi><mo>+</mo><msub><mrow><mi>b</mi></mrow><mrow><mrow><mi>n</mi></mrow></mrow></msub><mi>p</mi></mrow></mrow></mfrac></mfenced><mo>=</mo><mfenced><mfrac linethickness="0"><mrow><mrow><msub><mrow><mi>a</mi></mrow><mrow><mrow><mi>n</mi><mo>+</mo><mn>1</mn></mrow></mrow></msub></mrow></mrow><mrow><mrow><msub><mrow><mi>b</mi></mrow><mrow><mrow><mi>n</mi><mo>+</mo><mn>1</mn></mrow></mrow></msub></mrow></mrow></mfrac></mfenced></mrow></math>
+<mrow><mfenced open='(' close=')'><mtable><mtr><mtd><mrow><mi>p</mi><mo>+</mo><mi>q</mi></mrow></mtd><mtd><mrow><mi>q</mi></mrow></mtd></mtr><mtr><mtd><mrow></mrow></mtd></mtr><mtr><mtd><mrow></mrow></mtd></mtr><mtr><mtd><mrow><mi>q</mi></mrow></mtd><mtd><mrow><mi>p</mi></mrow></mtd></mtr></mtable></mfenced><mfenced><mfrac linethickness="0"><mrow><mrow><msub><mrow><mi>a</mi></mrow><mrow><mrow><mi>n</mi></mrow></mrow></msub></mrow></mrow><mrow><mrow><msub><mrow><mi>b</mi></mrow><mrow><mrow><mi>n</mi></mrow></mrow></msub></mrow></mrow></mfrac></mfenced><mo>=</mo><mfenced><mfrac linethickness="0"><mrow><mrow><msub><mrow><mi>a</mi></mrow><mrow><mrow><mi>n</mi></mrow></mrow></msub><mo>(</mo><mi>p</mi><mo>+</mo><mi>q</mi><mo>)</mo><mo>+</mo><msub><mrow><mi>b</mi></mrow><mrow><mrow><mi>n</mi></mrow></mrow></msub><mi>q</mi></mrow></mrow><mrow><mrow><msub><mrow><mi>a</mi></mrow><mrow><mrow><mi>n</mi></mrow></mrow></msub><mi>q</mi><mo>+</mo><msub><mrow><mi>b</mi></mrow><mrow><mrow><mi>n</mi></mrow></mrow></msub><mi>p</mi></mrow></mrow></mfrac></mfenced><mo>=</mo><mfenced><mfrac linethickness="0"><mrow><mrow><msub><mrow><mi>a</mi></mrow><mrow><mrow><mi>n</mi><mo>+</mo><mn>1</mn></mrow></mrow></msub></mrow></mrow><mrow><mrow><msub><mrow><mi>b</mi></mrow><mrow><mrow><mi>n</mi><mo>+</mo><mn>1</mn></mrow></mrow></msub></mrow></mrow></mfrac></mfenced></mrow></math>
 
 Which indicates the transformation *T* can be regard as matrix multiplication, or linear transformation. Thus applying *T* twice is merely square a matrix:
 
 <math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
-<mrow><msup><mrow><mfenced open='(' close=')'><mtable><mtr><mtd><mrow><mi>p</mi><mo>+</mo><mi>q</mi></mrow></mtd><mtd><mrow><mi>q</mi></mrow></mtd></mtr><mtr><mtd><mrow></mrow></mtd></mtr><mtr><mtd><mrow></mrow></mtd></mtr><mtr><mtd><mrow><mi>r</mi><mi>q</mi></mrow></mtd><mtd><mrow><mi>p</mi></mrow></mtd></mtr></mtable></mfenced></mrow><mrow><mrow><mn>2</mn></mrow></mrow></msup><mo>=</mo><mfenced open='(' close=')'><mtable><mtr><mtd><mrow><msup><mrow><mi>p</mi></mrow><mrow><mrow><mn>2</mn></mrow></mrow></msup><mo>+</mo><mn>2</mn><mi>p</mi><mi>q</mi><mo>+</mo><mn>2</mn><msup><mrow><mi>q</mi></mrow><mrow><mrow><mn>2</mn></mrow></mrow></msup></mrow></mtd><mtd><mrow><mn>2</mn><mi>p</mi><mi>q</mi><mo>+</mo><msup><mrow><mi>q</mi></mrow><mrow><mrow><mn>2</mn></mrow></mrow></msup></mrow></mtd></mtr><mtr><mtd><mrow></mrow></mtd></mtr><mtr><mtd><mrow></mrow></mtd></mtr><mtr><mtd><mrow><mi>r</mi><mn>2</mn><mi>p</mi><mi>q</mi><mo>+</mo><msup><mrow><mi>q</mi></mrow><mrow><mrow><mn>2</mn></mrow></mrow></msup></mrow></mtd><mtd><mrow><msup><mrow><mi>p</mi></mrow><mrow><mrow><mn>2</mn></mrow></mrow></msup><mo>+</mo><msup><mrow><mi>q</mi></mrow><mrow><mrow><mn>2</mn></mrow></mrow></msup></mrow></mtd></mtr></mtable></mfenced></mrow></math>
+<mrow><msup><mrow><mfenced open='(' close=')'><mtable><mtr><mtd><mrow><mi>p</mi><mo>+</mo><mi>q</mi></mrow></mtd><mtd><mrow><mi>q</mi></mrow></mtd></mtr><mtr><mtd><mrow></mrow></mtd></mtr><mtr><mtd><mrow></mrow></mtd></mtr><mtr><mtd><mrow><mi>q</mi></mrow></mtd><mtd><mrow><mi>p</mi></mrow></mtd></mtr></mtable></mfenced></mrow><mrow><mrow><mn>2</mn></mrow></mrow></msup><mo>=</mo><mfenced open='(' close=')'><mtable><mtr><mtd><mrow><msup><mrow><mi>p</mi></mrow><mrow><mrow><mn>2</mn></mrow></mrow></msup><mo>+</mo><mn>2</mn><mi>p</mi><mi>q</mi><mo>+</mo><mn>2</mn><msup><mrow><mi>q</mi></mrow><mrow><mrow><mn>2</mn></mrow></mrow></msup></mrow></mtd><mtd><mrow><mn>2</mn><mi>p</mi><mi>q</mi><mo>+</mo><msup><mrow><mi>q</mi></mrow><mrow><mrow><mn>2</mn></mrow></mrow></msup></mrow></mtd></mtr><mtr><mtd><mrow></mrow></mtd></mtr><mtr><mtd><mrow></mrow></mtd></mtr><mtr><mtd><mrow><mn>2</mn><mi>p</mi><mi>q</mi><mo>+</mo><msup><mrow><mi>q</mi></mrow><mrow><mrow><mn>2</mn></mrow></mrow></msup></mrow></mtd><mtd><mrow><msup><mrow><mi>p</mi></mrow><mrow><mrow><mn>2</mn></mrow></mrow></msup><mo>+</mo><msup><mrow><mi>q</mi></mrow><mrow><mrow><mn>2</mn></mrow></mrow></msup></mrow></mtd></mtr></mtable></mfenced></mrow></math>
 
 We derive a new matrix in the same form of the former one, where
 
@@ -155,6 +157,7 @@ which is the answer we are looking for.
 
 # 3. Fermat Test
 这部分用费马小定理做质数检验的内容挺有趣。这是一个把指数检验的时间复杂度从O(n<sup>1/2</sup>)降到O(log n)的*probabilistic methods*. 注释47的一段话很有意思：
+
 > In testing primality of very large numbers chosen at random, the chance of stumbling upon a value that fools the Fermat test is less than the chance that cosmic radiation will cause the computer to make an error in carrying out a "correct" algorithm. Considering an algorithm to be inadequate for the first reason but not for the second illustrates the difference between mathematics and engineering.
 
 ---
@@ -164,35 +167,39 @@ which is the answer we are looking for.
 
 ### Exercise 1.41.  
 
-Define a procedure double that takes a procedure of one argument as argument and returns a procedure that applies the original procedure twice. For example, if inc is a procedure that adds 1 to its argument, then (double inc) should be a procedure that adds 2. What value is returned by`(((double (double double)) inc) 5)`
+Define a procedure double that takes a procedure of one argument as argument and returns a procedure that applies the original procedure twice. For example, if `inc` is a procedure that adds 1 to its argument, then `(double inc)` should be a procedure that adds 2. What value is returned by`(((double (double double)) inc) 5)`
 
 ### Solution 1.41: 
 
-```scheme
+{% highlight scheme %}
 (define (double f)
   (lambda (i) (f (f i))))
+{% endhighlight %}
+
+```scheme
+> (((double (double double)) inc) 5)
+  21
 ```
-21
 
 ### 补充
 
 值得注意的是语法。我们会发现这句话`(((double (double double)) inc) 5)`其实和下面是等价的：
 
-```scheme
+{% highlight scheme %}
 ((((lambda (i) (double (double i)))
  double) inc)
  5)
-```
-而`inc`竟然能这样作为参数被进新的procedure`(double (double double))`中。我觉得，毕竟还是第一章，既然书里也没进一步解释，**just remember that this patterns works.**等后面进一步讲语法的时候再来看解释器的具体实现吧，那么这里就要挖一个坑等以后填了。
+{% endhighlight %}
+而`inc`竟然能这样作为参数被进新的procedure`(double (double double))`中。我觉得，毕竟还是第一章，既然书里也没进一步解释，**just remember that this patterns works.**等后面进一步讲语法的时候再来看解释器的具体实现吧，**那么这里就要挖一个坑等以后填了。**
 
 ---
 
 ### Exercise 1.45.  
-We saw in section 1.3.3 that attempting to compute square roots by naively finding a fixed point of y->x/y does not converge, and that this can be fixed by average damping. The same method works for finding cube roots as fixed points of the average-damped y->x/y<sup>2</sup>. Unfortunately, the process does not work for fourth roots -- a single average damp is not enough to make a fixed-point search for y->x/y<sup>3</sup> converge. On the other hand, if we average damp twice (i.e., use the average damp of the average damp of y->x/y<sup>3</sup>) the fixed-point search does converge. Do some experiments to determine how many average damps are required to compute nth roots as a fixed-point search based upon repeated average damping of y->x/y<sup>n-1</sup>. Use this to implement a simple procedure for computing nth roots using `fixed-point`, `average-damp`, and the `repeated` procedure of exercise 1.43. Assume that any arithmetic operations you need are available as primitives.
+We saw in section 1.3.3 that attempting to compute square roots by naively finding a fixed point of *y->x/y* does not converge, and that this can be fixed by average damping. The same method works for finding cube roots as fixed points of the average-damped *y->x/y<sup>2</sup>*. Unfortunately, the process does not work for fourth roots -- a single average damp is not enough to make a fixed-point search for *y->x/y<sup>3</sup>* converge. On the other hand, if we average damp twice (*i.e.*, use the average damp of the average damp of *y->x/y<sup>3</sup>*) the fixed-point search does converge. Do some experiments to determine how many average damps are required to compute nth roots as a fixed-point search based upon repeated average damping of *y->x/y<sup>n-1</sup>*. Use this to implement a simple procedure for computing *n*th roots using `fixed-point`, `average-damp`, and the `repeated` procedure of exercise 1.43. Assume that any arithmetic operations you need are available as primitives.
 
 ### Solution 1.45.
 
-```scheme  
+{% highlight scheme %}
 (define (repeated f times)
   (lambda (i)
     (if (<= times 0)
@@ -205,10 +212,10 @@ We saw in section 1.3.3 that attempting to compute square roots by naively findi
       ((repeated average-damp (/ (log n) (log 2)))
        (lambda (y) (/ x (fast-expt y (- n 1))))))
     i) 1.0))
-```
+{% endhighlight %}
 *`fixed-point` & `average-damp` is omitted.*
 
-After some experiments, the times of average-damp required is like:
+After some experiments, the times of average-damp required are:
 
 * 2 ~ 3:  	1
 * 4 ~ 7:  	2
@@ -216,7 +223,7 @@ After some experiments, the times of average-damp required is like:
 * ...
 * 2<sup>n</sup> ~ 2<sup>n+1</sup>-1: n
 
-Which leads to *times = log<sub>2</sub>n*
+Therefore, *times = log<sub>2</sub>n*
 
 Notice that by using `(<= times 0)` instead of `(= times 0)` in the *predicate expression* in `repeated`, rounding log<sub>2</sub>n can be avoided.
 

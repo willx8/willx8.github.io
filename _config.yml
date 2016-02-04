@@ -3,7 +3,7 @@ title: Will'X Blog
 SEOTitle: 吴翔的博客 | Will'X Blog
 header-img: img/home-bg.jpg
 email: willx8@gmail.com
-description: "SE@SJTU 会一点C++/Go/Python/C/Java/Scheme 对分布式/机器学习感兴趣 编程/平面设计/美"
+description: "SE@SJTU 会一点C++/Go/Python/C/Java/Scheme 编程/平面设计/美"
 keyword: "吴翔, willx8, 吴翔的博客, Will'X Blog, 博客, 个人网站, 技术, 设计"
 url: "http://willx8.github.io"              # your host, for absolute URL
 baseurl: ""                             # for example, '/blog' if your blog hosted on 'host/blog'
