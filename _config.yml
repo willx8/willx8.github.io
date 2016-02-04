@@ -59,12 +59,12 @@ kramdown:
 
 
 
-    ## Analytics settings
-    ## Baidu Analytics
-    #ba_track_id: 4cc1f2d8f3067386cc5cdb626a202900
-    ## Google Analytics
-    #ga_track_id: 'UA-49627206-1'            # Format: UA-xxxxxx-xx
-    #ga_domain: huangxuan.me
+# Analytics settings
+# Baidu Analytics
+ba_track_id: 5d4781e7d37cd66b26a3a87a2eee32c5
+# Google Analytics
+ga_track_id: 'UA-73347036-1'            # Format: UA-xxxxxx-xx
+ga_domain: willx8.github.io
 
 
 
