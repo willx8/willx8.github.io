@@ -228,10 +228,7 @@
 
 <p>重写了两次master.go的代码，感觉最后一版简洁舒服多了。原来设计成iterate through all jobs and assign them to workers in a new gorouine.后来改成create a goroutine for each worker, who retrieves job from joblist every time it finishes a job.效率提高不上，也增加了代码重用率。不过我没有让map&amp;reduce同时进行，而是先让所有worker do map，再一起do reduce，是可以改进的地方。</p>
 
-<p>等Lab2写完再一起更。<br />
-*   aa<br />
-*   aa<br />
-*   sdad</p>
+<p>等Lab2写完再一起更。</p>
 
 <h3 id="ssc">3. 写两个<s>可能烂尾的</s>C++贪吃蛇</h3>
 <p>看到一种说法，自己写几个项目(from scratch)是挺有必要的，是练习语言的好机会。而且，能在写的过程中学习设计模式、 版本控制等等，这是写大作业核心代码比不了的。</p>
@@ -264,6 +261,13 @@
 
                 <ul class="pager">
                     
+                    
+                    <li class="next">
+                        <a href="/2016/02/04/SICP-chapter1/" data-toggle="tooltip" data-placement="top" title="A Review of SICP Chapter1">
+                        Next<br>
+                        <span>A Review of SICP Chapter1</span>
+                        </a>
+                    </li>
                     
                 </ul>
 

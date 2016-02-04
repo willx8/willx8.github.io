@@ -1,7 +1,7 @@
 ---
 layout:     post
 title:      "A Review of SICP Chapter1"
-date:       2016-02-04 17:12:00
+date:       2016-02-04
 author:     "William"
 header-img: "img/post-bg-sicp-chp1.jpg"
 excerpt_separator: <!--more-->

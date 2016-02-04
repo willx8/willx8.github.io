@@ -5,9 +5,236 @@
     <description>SE@SJTU 会一点C++/Go/Python/C/Java/Scheme 对分布式/机器学习感兴趣 编程/平面设计/美</description>
     <link>http://willx8.github.io/</link>
     <atom:link href="http://willx8.github.io/feed.xml" rel="self" type="application/rss+xml" />
-    <pubDate>Sun, 31 Jan 2016 18:11:57 +0800</pubDate>
-    <lastBuildDate>Sun, 31 Jan 2016 18:11:57 +0800</lastBuildDate>
+    <pubDate>Thu, 04 Feb 2016 22:50:54 +0800</pubDate>
+    <lastBuildDate>Thu, 04 Feb 2016 22:50:54 +0800</lastBuildDate>
     <generator>Jekyll v2.4.0</generator>
+    
+      <item>
+        <title>A Review of SICP Chapter1</title>
+        <description>&lt;blockquote&gt;
+  &lt;p&gt;“A computational process is indeed much like a sorcerer’s idea of a spirit. “&lt;br /&gt;
+&lt;!--more--&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;刚刚看完SICP第一章，Building Abstractions with Procedures.&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;https://github.com/willx8/sicp-log/blob/master/chp1/SICP-C1.scm&quot;&gt;这里是我的第一章&lt;s&gt;跳了不少题的&lt;/s&gt;题解。&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;写一篇读书笔记，算是让自己回顾一下。只提几个有趣之处。&lt;/p&gt;
+
+&lt;s&gt;实在找不到好看的题图就只好自己做了张。&lt;/s&gt;
+
+&lt;h1 id=&quot;evaluation&quot;&gt;1.Evaluation&lt;/h1&gt;
+&lt;p&gt;Exercise 1.5可以看到两种方式(applicative-order evaluation &amp;amp; normal-order)的区别，为了避免一句话里中英夹杂让人不爽，下面有些解答直接用英文了。&lt;/p&gt;
+
+&lt;h3 id=&quot;exercise-15&quot;&gt;Exercise 1.5.&lt;/h3&gt;
+&lt;p&gt;Ben Bitdiddle has invented a test to determine whether the interpreter he is faced with is using applicative-order evaluation or normal-order evaluation. He defines the following two procedures:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-scheme&quot;&gt;(define (p) (p))
+
+(define (test x y)
+  (if (= x 0)
+      0
+      y))
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Then he evaluates the expression&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-scheme&quot;&gt;(test 0 (p))
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;What behavior will Ben observe with an interpreter that uses applicative-order evaluation? What behavior will he observe with an interpreter that uses normal-order evaluation? Explain your answer. (Assume that the evaluation rule for the special form if is the same whether the interpreter is using normal or applicative order: The predicate expression is evaluated first, and the result determines whether to evaluate the consequent or the alternative expression.)&lt;/p&gt;
+
+&lt;h3 id=&quot;solution-15&quot;&gt;Solution 1.5.&lt;/h3&gt;
+&lt;ul&gt;
+  &lt;li&gt;If an interpreter uses normal-order evaluation:&lt;br /&gt;
+&lt;code&gt;(test 0 (p))&lt;/code&gt; will be evaluated &lt;code&gt;(if (= 0 0) 0 p)&lt;/code&gt;. Then “the predicate expression is evaluated first”, thus &lt;code&gt;(= 0 0)&lt;/code&gt; generate true, the result shall be &lt;code&gt;0&lt;/code&gt;.&lt;/li&gt;
+  &lt;li&gt;If an interpreter uses applicative-order evalution:&lt;br /&gt;
+&lt;code&gt;(test 0 (p))&lt;/code&gt; will be &lt;code&gt;(test 0 (p))&lt;/code&gt;, intepreter ‘substitute’ &lt;code&gt;(p)&lt;/code&gt; for &lt;code&gt;(p)&lt;/code&gt; forever, the answer will never be genearted.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;下面关于new-if的题可以和上面这道连起来看：&lt;/p&gt;
+
+&lt;h3 id=&quot;exercise-16&quot;&gt;Exercise 1.6.&lt;/h3&gt;
+&lt;p&gt;Alyssa P. Hacker doesn’t see why if needs to be provided as a special form. ``Why can’t I just define it as an ordinary procedure in terms of cond?’’ she asks. Alyssa’s friend Eva Lu Ator claims this can indeed be done, and she defines a new version of if:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-scheme&quot;&gt;(define (new-if predicate then-clause else-clause)
+  (cond (predicate then-clause)
+        (else else-clause)))
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Eva demonstrates the program for Alyssa:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-scheme&quot;&gt;(new-if (= 2 3) 0 5)
+5
+
+(new-if (= 1 1) 0 5)
+0
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Delighted, Alyssa uses new-if to rewrite the square-root program:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-scheme&quot;&gt;(define (sqrt-iter guess x)
+  (new-if (good-enough? guess x)
+          guess
+          (sqrt-iter (improve guess x)
+                     x)))
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;What happens when Alyssa attempts to use this to compute square roots? Explain.&lt;/p&gt;
+
+&lt;h3 id=&quot;solution-16&quot;&gt;Solution 1.6.&lt;/h3&gt;
+&lt;p&gt;Since our interpreter uses applicative-order evaluation, new-if is interpreted later than &amp;lt;else-clause&amp;gt;. The interpreter evaluates &amp;lt;predicate expression&amp;gt;. Then it evaluates &amp;lt;else-clause&amp;gt;: we have &lt;code&gt;(improve guess x)&lt;/code&gt; evaluated first, call it &lt;code&gt;y1&lt;/code&gt; , then &lt;code&gt;sqrt-iter&lt;/code&gt; evaluated:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-scheme&quot;&gt;(define (sqrt-iter guess x)
+  (new-if &amp;lt;some-evaluated-value&amp;gt;
+          guess
+          ((new-if (good-enough? y0 x)
+          		guess
+	          	(sqrt-iter (improve y0 x)
+                     		x)))))
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Since no branch decision is made due to the late-evaluation of &lt;code&gt;new-if&lt;/code&gt;, there will be an infinite substition of &lt;code&gt;sqrt-iter&lt;/code&gt;.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;h1 id=&quot;section&quot;&gt;2.花式斐波那契&lt;/h1&gt;
+&lt;p&gt;1.2.4的练习题很巧妙&lt;br /&gt;
+一步一步地引到1.19上，教你把一次求斐波那契数列下一项的过程看做一次变换&lt;em&gt;T&lt;/em&gt;，如果找到等价于运用两次变换&lt;em&gt;T&lt;/em&gt;的变换&lt;em&gt;T’&lt;/em&gt;，由于找到了&lt;em&gt;T&lt;/em&gt;的“平方”，就可以像快速幂一样用O(log n)的速度求出答案。而&lt;em&gt;T&lt;/em&gt;实际就是矩阵乘法，所谓两次&lt;em&gt;T&lt;/em&gt;变换就是矩阵的平方。所以这题也可以看成是矩阵乘法的“快速幂”。看题：&lt;/p&gt;
+
+&lt;h3 id=&quot;exercies-119&quot;&gt;Exercies 1.19.&lt;/h3&gt;
+
+&lt;p&gt;There is a clever algorithm for computing the Fibonacci numbers in a logarithmic number of steps.&lt;/p&gt;
+
+&lt;p&gt;Recall the transformation of the state variables &lt;em&gt;a&lt;/em&gt; and &lt;em&gt;b&lt;/em&gt; in the &lt;tt&gt;fib-iter&lt;/tt&gt; process of section 1.2.2: &lt;em&gt;a&lt;/em&gt; &amp;lt;- &lt;em&gt;a&lt;/em&gt; + &lt;em&gt;b&lt;/em&gt; and &lt;em&gt;b&lt;/em&gt; &amp;lt;-&lt;em&gt;a&lt;/em&gt;.  Call this transformation &lt;em&gt;T&lt;/em&gt;, and observe that applying &lt;em&gt;T&lt;/em&gt; over and over again &lt;em&gt;n&lt;/em&gt; times, starting with 1 and 0, produces the pair &lt;em&gt;F&lt;/em&gt;&lt;em&gt;i&lt;/em&gt;&lt;em&gt;b&lt;/em&gt;(&lt;em&gt;n + 1&lt;/em&gt;) and  &lt;em&gt;F&lt;/em&gt;&lt;em&gt;i&lt;/em&gt;&lt;em&gt;b&lt;/em&gt;(&lt;em&gt;n&lt;/em&gt;).  In other words, the Fibonacci numbers are produced by applying &lt;em&gt;T&lt;/em&gt;&lt;sup&gt;&lt;em&gt;n&lt;/em&gt;&lt;/sup&gt;, the &lt;em&gt;n&lt;/em&gt;th power of the transformation &lt;em&gt;T&lt;/em&gt;, starting with the pair (1,0).  Now consider &lt;em&gt;T&lt;/em&gt; to be the special case of &lt;em&gt;p&lt;/em&gt; = 0 and &lt;em&gt;q&lt;/em&gt; = 1 in a family of transformations &lt;em&gt;T&lt;/em&gt;&lt;sub&gt;&lt;em&gt;p&lt;/em&gt;&lt;em&gt;q&lt;/em&gt;&lt;/sub&gt;, where &lt;em&gt;T&lt;/em&gt;&lt;sub&gt;&lt;em&gt;p&lt;/em&gt;&lt;em&gt;q&lt;/em&gt;&lt;/sub&gt; transforms the pair &lt;em&gt;(a, b)&lt;/em&gt; according to &lt;em&gt;a&lt;/em&gt; &amp;lt;- &lt;em&gt;b&lt;/em&gt;&lt;em&gt;q&lt;/em&gt; + &lt;em&gt;a&lt;/em&gt;&lt;em&gt;q&lt;/em&gt; + &lt;em&gt;a&lt;/em&gt;&lt;em&gt;p&lt;/em&gt; and &lt;em&gt;b&lt;/em&gt; &amp;lt;- &lt;em&gt;b&lt;/em&gt;&lt;em&gt;p&lt;/em&gt; + &lt;em&gt;a&lt;/em&gt;&lt;em&gt;q&lt;/em&gt;.&lt;/p&gt;
+
+&lt;p&gt;Show that if we apply such a transformation &lt;em&gt;T&lt;/em&gt;&lt;sub&gt;&lt;em&gt;p&lt;/em&gt;&lt;em&gt;q&lt;/em&gt;&lt;/sub&gt; twice, the effect is the same as using a single transformation &lt;em&gt;T&lt;sub&gt;p’q’&lt;/sub&gt;&lt;/em&gt; of the same form, and compute &lt;em&gt;p&lt;/em&gt;’ and &lt;em&gt;q&lt;/em&gt;’ in terms of &lt;em&gt;p&lt;/em&gt; and &lt;em&gt;q&lt;/em&gt;.  This gives us an explicit way to square these transformations, and thus we can compute &lt;em&gt;T&lt;/em&gt;&lt;sup&gt;&lt;em&gt;n&lt;/em&gt;&lt;/sup&gt; using successive squaring, as in the &lt;tt&gt;fast-expt&lt;/tt&gt; procedure.  Put this all together to complete the following procedure, which runs in a logarithmic number of steps:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-scheme&quot;&gt;(define (fib n)
+  (fib-iter 1 0 0 1 n))
+(define (fib-iter a b p q count)
+  (cond ((= count 0) b)
+        ((even? count)
+         (fib-iter a
+                   b
+                   &amp;lt;??&amp;gt;      ; compute p&#39;
+                   &amp;lt;??&amp;gt;      ; compute q&#39;
+                   (/ count 2)))
+        (else (fib-iter (+ (* b q) (* a q) (* a p))
+                        (+ (* b p) (* a q))
+                        p
+                        q
+                        (- count 1)))))
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id=&quot;solution-119&quot;&gt;Solution 1.19.&lt;/h3&gt;
+
+&lt;p&gt;Notice that:&lt;/p&gt;
+
+&lt;math xmlns=&quot;http://www.w3.org/1998/Math/MathML&quot; display=&quot;block&quot;&gt;
+&lt;mrow&gt;&lt;mfenced open=&quot;(&quot; close=&quot;)&quot;&gt;&lt;mtable&gt;&lt;mtr&gt;&lt;mtd&gt;&lt;mrow&gt;&lt;mi&gt;p&lt;/mi&gt;&lt;mo&gt;+&lt;/mo&gt;&lt;mi&gt;q&lt;/mi&gt;&lt;/mrow&gt;&lt;/mtd&gt;&lt;mtd&gt;&lt;mrow&gt;&lt;mi&gt;q&lt;/mi&gt;&lt;/mrow&gt;&lt;/mtd&gt;&lt;/mtr&gt;&lt;mtr&gt;&lt;mtd&gt;&lt;mrow&gt;&lt;/mrow&gt;&lt;/mtd&gt;&lt;/mtr&gt;&lt;mtr&gt;&lt;mtd&gt;&lt;mrow&gt;&lt;/mrow&gt;&lt;/mtd&gt;&lt;/mtr&gt;&lt;mtr&gt;&lt;mtd&gt;&lt;mrow&gt;&lt;mi&gt;r&lt;/mi&gt;&lt;mi&gt;q&lt;/mi&gt;&lt;/mrow&gt;&lt;/mtd&gt;&lt;mtd&gt;&lt;mrow&gt;&lt;mi&gt;p&lt;/mi&gt;&lt;/mrow&gt;&lt;/mtd&gt;&lt;/mtr&gt;&lt;/mtable&gt;&lt;/mfenced&gt;&lt;mfenced&gt;&lt;mfrac linethickness=&quot;0&quot;&gt;&lt;mrow&gt;&lt;mrow&gt;&lt;msub&gt;&lt;mrow&gt;&lt;mi&gt;a&lt;/mi&gt;&lt;/mrow&gt;&lt;mrow&gt;&lt;mrow&gt;&lt;mi&gt;n&lt;/mi&gt;&lt;/mrow&gt;&lt;/mrow&gt;&lt;/msub&gt;&lt;/mrow&gt;&lt;/mrow&gt;&lt;mrow&gt;&lt;mrow&gt;&lt;msub&gt;&lt;mrow&gt;&lt;mi&gt;b&lt;/mi&gt;&lt;/mrow&gt;&lt;mrow&gt;&lt;mrow&gt;&lt;mi&gt;n&lt;/mi&gt;&lt;/mrow&gt;&lt;/mrow&gt;&lt;/msub&gt;&lt;/mrow&gt;&lt;/mrow&gt;&lt;/mfrac&gt;&lt;/mfenced&gt;&lt;mo&gt;=&lt;/mo&gt;&lt;mfenced&gt;&lt;mfrac linethickness=&quot;0&quot;&gt;&lt;mrow&gt;&lt;mrow&gt;&lt;msub&gt;&lt;mrow&gt;&lt;mi&gt;a&lt;/mi&gt;&lt;/mrow&gt;&lt;mrow&gt;&lt;mrow&gt;&lt;mi&gt;n&lt;/mi&gt;&lt;/mrow&gt;&lt;/mrow&gt;&lt;/msub&gt;&lt;mo&gt;(&lt;/mo&gt;&lt;mi&gt;p&lt;/mi&gt;&lt;mo&gt;+&lt;/mo&gt;&lt;mi&gt;q&lt;/mi&gt;&lt;mo&gt;)&lt;/mo&gt;&lt;mo&gt;+&lt;/mo&gt;&lt;msub&gt;&lt;mrow&gt;&lt;mi&gt;b&lt;/mi&gt;&lt;/mrow&gt;&lt;mrow&gt;&lt;mrow&gt;&lt;mi&gt;n&lt;/mi&gt;&lt;/mrow&gt;&lt;/mrow&gt;&lt;/msub&gt;&lt;mi&gt;q&lt;/mi&gt;&lt;/mrow&gt;&lt;/mrow&gt;&lt;mrow&gt;&lt;mrow&gt;&lt;msub&gt;&lt;mrow&gt;&lt;mi&gt;a&lt;/mi&gt;&lt;/mrow&gt;&lt;mrow&gt;&lt;mrow&gt;&lt;mi&gt;n&lt;/mi&gt;&lt;/mrow&gt;&lt;/mrow&gt;&lt;/msub&gt;&lt;mi&gt;q&lt;/mi&gt;&lt;mo&gt;+&lt;/mo&gt;&lt;msub&gt;&lt;mrow&gt;&lt;mi&gt;b&lt;/mi&gt;&lt;/mrow&gt;&lt;mrow&gt;&lt;mrow&gt;&lt;mi&gt;n&lt;/mi&gt;&lt;/mrow&gt;&lt;/mrow&gt;&lt;/msub&gt;&lt;mi&gt;p&lt;/mi&gt;&lt;/mrow&gt;&lt;/mrow&gt;&lt;/mfrac&gt;&lt;/mfenced&gt;&lt;mo&gt;=&lt;/mo&gt;&lt;mfenced&gt;&lt;mfrac linethickness=&quot;0&quot;&gt;&lt;mrow&gt;&lt;mrow&gt;&lt;msub&gt;&lt;mrow&gt;&lt;mi&gt;a&lt;/mi&gt;&lt;/mrow&gt;&lt;mrow&gt;&lt;mrow&gt;&lt;mi&gt;n&lt;/mi&gt;&lt;mo&gt;+&lt;/mo&gt;&lt;mn&gt;1&lt;/mn&gt;&lt;/mrow&gt;&lt;/mrow&gt;&lt;/msub&gt;&lt;/mrow&gt;&lt;/mrow&gt;&lt;mrow&gt;&lt;mrow&gt;&lt;msub&gt;&lt;mrow&gt;&lt;mi&gt;b&lt;/mi&gt;&lt;/mrow&gt;&lt;mrow&gt;&lt;mrow&gt;&lt;mi&gt;n&lt;/mi&gt;&lt;mo&gt;+&lt;/mo&gt;&lt;mn&gt;1&lt;/mn&gt;&lt;/mrow&gt;&lt;/mrow&gt;&lt;/msub&gt;&lt;/mrow&gt;&lt;/mrow&gt;&lt;/mfrac&gt;&lt;/mfenced&gt;&lt;/mrow&gt;&lt;/math&gt;
+
+&lt;p&gt;Which indicates the transformation &lt;em&gt;T&lt;/em&gt; can be regard as matrix multiplication, or linear transformation. Thus applying &lt;em&gt;T&lt;/em&gt; twice is merely square a matrix:&lt;/p&gt;
+
+&lt;math xmlns=&quot;http://www.w3.org/1998/Math/MathML&quot; display=&quot;block&quot;&gt;
+&lt;mrow&gt;&lt;msup&gt;&lt;mrow&gt;&lt;mfenced open=&quot;(&quot; close=&quot;)&quot;&gt;&lt;mtable&gt;&lt;mtr&gt;&lt;mtd&gt;&lt;mrow&gt;&lt;mi&gt;p&lt;/mi&gt;&lt;mo&gt;+&lt;/mo&gt;&lt;mi&gt;q&lt;/mi&gt;&lt;/mrow&gt;&lt;/mtd&gt;&lt;mtd&gt;&lt;mrow&gt;&lt;mi&gt;q&lt;/mi&gt;&lt;/mrow&gt;&lt;/mtd&gt;&lt;/mtr&gt;&lt;mtr&gt;&lt;mtd&gt;&lt;mrow&gt;&lt;/mrow&gt;&lt;/mtd&gt;&lt;/mtr&gt;&lt;mtr&gt;&lt;mtd&gt;&lt;mrow&gt;&lt;/mrow&gt;&lt;/mtd&gt;&lt;/mtr&gt;&lt;mtr&gt;&lt;mtd&gt;&lt;mrow&gt;&lt;mi&gt;r&lt;/mi&gt;&lt;mi&gt;q&lt;/mi&gt;&lt;/mrow&gt;&lt;/mtd&gt;&lt;mtd&gt;&lt;mrow&gt;&lt;mi&gt;p&lt;/mi&gt;&lt;/mrow&gt;&lt;/mtd&gt;&lt;/mtr&gt;&lt;/mtable&gt;&lt;/mfenced&gt;&lt;/mrow&gt;&lt;mrow&gt;&lt;mrow&gt;&lt;mn&gt;2&lt;/mn&gt;&lt;/mrow&gt;&lt;/mrow&gt;&lt;/msup&gt;&lt;mo&gt;=&lt;/mo&gt;&lt;mfenced open=&quot;(&quot; close=&quot;)&quot;&gt;&lt;mtable&gt;&lt;mtr&gt;&lt;mtd&gt;&lt;mrow&gt;&lt;msup&gt;&lt;mrow&gt;&lt;mi&gt;p&lt;/mi&gt;&lt;/mrow&gt;&lt;mrow&gt;&lt;mrow&gt;&lt;mn&gt;2&lt;/mn&gt;&lt;/mrow&gt;&lt;/mrow&gt;&lt;/msup&gt;&lt;mo&gt;+&lt;/mo&gt;&lt;mn&gt;2&lt;/mn&gt;&lt;mi&gt;p&lt;/mi&gt;&lt;mi&gt;q&lt;/mi&gt;&lt;mo&gt;+&lt;/mo&gt;&lt;mn&gt;2&lt;/mn&gt;&lt;msup&gt;&lt;mrow&gt;&lt;mi&gt;q&lt;/mi&gt;&lt;/mrow&gt;&lt;mrow&gt;&lt;mrow&gt;&lt;mn&gt;2&lt;/mn&gt;&lt;/mrow&gt;&lt;/mrow&gt;&lt;/msup&gt;&lt;/mrow&gt;&lt;/mtd&gt;&lt;mtd&gt;&lt;mrow&gt;&lt;mn&gt;2&lt;/mn&gt;&lt;mi&gt;p&lt;/mi&gt;&lt;mi&gt;q&lt;/mi&gt;&lt;mo&gt;+&lt;/mo&gt;&lt;msup&gt;&lt;mrow&gt;&lt;mi&gt;q&lt;/mi&gt;&lt;/mrow&gt;&lt;mrow&gt;&lt;mrow&gt;&lt;mn&gt;2&lt;/mn&gt;&lt;/mrow&gt;&lt;/mrow&gt;&lt;/msup&gt;&lt;/mrow&gt;&lt;/mtd&gt;&lt;/mtr&gt;&lt;mtr&gt;&lt;mtd&gt;&lt;mrow&gt;&lt;/mrow&gt;&lt;/mtd&gt;&lt;/mtr&gt;&lt;mtr&gt;&lt;mtd&gt;&lt;mrow&gt;&lt;/mrow&gt;&lt;/mtd&gt;&lt;/mtr&gt;&lt;mtr&gt;&lt;mtd&gt;&lt;mrow&gt;&lt;mi&gt;r&lt;/mi&gt;&lt;mn&gt;2&lt;/mn&gt;&lt;mi&gt;p&lt;/mi&gt;&lt;mi&gt;q&lt;/mi&gt;&lt;mo&gt;+&lt;/mo&gt;&lt;msup&gt;&lt;mrow&gt;&lt;mi&gt;q&lt;/mi&gt;&lt;/mrow&gt;&lt;mrow&gt;&lt;mrow&gt;&lt;mn&gt;2&lt;/mn&gt;&lt;/mrow&gt;&lt;/mrow&gt;&lt;/msup&gt;&lt;/mrow&gt;&lt;/mtd&gt;&lt;mtd&gt;&lt;mrow&gt;&lt;msup&gt;&lt;mrow&gt;&lt;mi&gt;p&lt;/mi&gt;&lt;/mrow&gt;&lt;mrow&gt;&lt;mrow&gt;&lt;mn&gt;2&lt;/mn&gt;&lt;/mrow&gt;&lt;/mrow&gt;&lt;/msup&gt;&lt;mo&gt;+&lt;/mo&gt;&lt;msup&gt;&lt;mrow&gt;&lt;mi&gt;q&lt;/mi&gt;&lt;/mrow&gt;&lt;mrow&gt;&lt;mrow&gt;&lt;mn&gt;2&lt;/mn&gt;&lt;/mrow&gt;&lt;/mrow&gt;&lt;/msup&gt;&lt;/mrow&gt;&lt;/mtd&gt;&lt;/mtr&gt;&lt;/mtable&gt;&lt;/mfenced&gt;&lt;/mrow&gt;&lt;/math&gt;
+
+&lt;p&gt;We derive a new matrix in the same form of the former one, where&lt;/p&gt;
+
+&lt;p&gt;&lt;em&gt;p’ = p&lt;sup&gt;2&lt;/sup&gt;+q&lt;sup&gt;2&lt;/sup&gt;, q’ = 2pq+q&lt;sup&gt;2&lt;/sup&gt;,&lt;/em&gt;&lt;/p&gt;
+
+&lt;p&gt;which is the answer we are looking for.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;h1 id=&quot;fermat-test&quot;&gt;3. Fermat Test&lt;/h1&gt;
+&lt;p&gt;这部分用费马小定理做质数检验的内容挺有趣。这是一个把指数检验的时间复杂度从O(n&lt;sup&gt;1/2&lt;/sup&gt;)降到O(log n)的&lt;em&gt;probabilistic methods&lt;/em&gt;. 注释47的一段话很有意思：&lt;br /&gt;
+&amp;gt; In testing primality of very large numbers chosen at random, the chance of stumbling upon a value that fools the Fermat test is less than the chance that cosmic radiation will cause the computer to make an error in carrying out a “correct” algorithm. Considering an algorithm to be inadequate for the first reason but not for the second illustrates the difference between mathematics and engineering.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;h1 id=&quot;lambda&quot;&gt;4. Lambda大法好&lt;/h1&gt;
+&lt;p&gt;1.3节大概是真的开始函数式编程了。这一节每组题基本都层层递进，不断往高层次抽象过程，很有趣，像我这样喜欢跳题的全做了，有兴趣可以看我的题解。两道题值得再提一下。&lt;/p&gt;
+
+&lt;h3 id=&quot;exercise-141&quot;&gt;Exercise 1.41.&lt;/h3&gt;
+
+&lt;p&gt;Define a procedure double that takes a procedure of one argument as argument and returns a procedure that applies the original procedure twice. For example, if inc is a procedure that adds 1 to its argument, then (double inc) should be a procedure that adds 2. What value is returned by&lt;code&gt;(((double (double double)) inc) 5)&lt;/code&gt;&lt;/p&gt;
+
+&lt;h3 id=&quot;solution-141&quot;&gt;Solution 1.41:&lt;/h3&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-scheme&quot;&gt;(define (double f)
+  (lambda (i) (f (f i))))
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;21&lt;/p&gt;
+
+&lt;h3 id=&quot;section-1&quot;&gt;补充&lt;/h3&gt;
+
+&lt;p&gt;值得注意的是语法。我们会发现这句话&lt;code&gt;(((double (double double)) inc) 5)&lt;/code&gt;其实和下面是等价的：&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-scheme&quot;&gt;((((lambda (i) (double (double i)))
+ double) inc)
+ 5)
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;而&lt;code&gt;inc&lt;/code&gt;竟然能这样作为参数被进新的procedure&lt;code&gt;(double (double double))&lt;/code&gt;中。我觉得，毕竟还是第一章，既然书里也没进一步解释，&lt;strong&gt;just remember that this patterns works.&lt;/strong&gt;等后面进一步讲语法的时候再来看解释器的具体实现吧，那么这里就要挖一个坑等以后填了。&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;h3 id=&quot;exercise-145&quot;&gt;Exercise 1.45.&lt;/h3&gt;
+&lt;p&gt;We saw in section 1.3.3 that attempting to compute square roots by naively finding a fixed point of y-&amp;gt;x/y does not converge, and that this can be fixed by average damping. The same method works for finding cube roots as fixed points of the average-damped y-&amp;gt;x/y&lt;sup&gt;2&lt;/sup&gt;. Unfortunately, the process does not work for fourth roots – a single average damp is not enough to make a fixed-point search for y-&amp;gt;x/y&lt;sup&gt;3&lt;/sup&gt; converge. On the other hand, if we average damp twice (i.e., use the average damp of the average damp of y-&amp;gt;x/y&lt;sup&gt;3&lt;/sup&gt;) the fixed-point search does converge. Do some experiments to determine how many average damps are required to compute nth roots as a fixed-point search based upon repeated average damping of y-&amp;gt;x/y&lt;sup&gt;n-1&lt;/sup&gt;. Use this to implement a simple procedure for computing nth roots using &lt;code&gt;fixed-point&lt;/code&gt;, &lt;code&gt;average-damp&lt;/code&gt;, and the &lt;code&gt;repeated&lt;/code&gt; procedure of exercise 1.43. Assume that any arithmetic operations you need are available as primitives.&lt;/p&gt;
+
+&lt;h3 id=&quot;solution-145&quot;&gt;Solution 1.45.&lt;/h3&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-scheme&quot;&gt;(define (repeated f times)
+  (lambda (i)
+    (if (&amp;lt;= times 0)
+        i
+        ((composition f (repeated f (- times 1))) i))))
+
+(define (n-th-root i n)
+  (fixed-point
+   ((lambda (x)
+      ((repeated average-damp (/ (log n) (log 2)))
+       (lambda (y) (/ x (fast-expt y (- n 1))))))
+    i) 1.0))
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;em&gt;&lt;code&gt;fixed-point&lt;/code&gt; &amp;amp; &lt;code&gt;average-damp&lt;/code&gt; is omitted.&lt;/em&gt;&lt;/p&gt;
+
+&lt;p&gt;After some experiments, the times of average-damp required is like:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;2 ~ 3:  	1&lt;/li&gt;
+  &lt;li&gt;4 ~ 7:  	2&lt;/li&gt;
+  &lt;li&gt;8 ~ 15: 	3&lt;/li&gt;
+  &lt;li&gt;…&lt;/li&gt;
+  &lt;li&gt;2&lt;sup&gt;n&lt;/sup&gt; ~ 2&lt;sup&gt;n+1&lt;/sup&gt;-1: n&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Which leads to &lt;em&gt;times = log&lt;sub&gt;2&lt;/sub&gt;n&lt;/em&gt;&lt;/p&gt;
+
+&lt;p&gt;Notice that by using &lt;code&gt;(&amp;lt;= times 0)&lt;/code&gt; instead of &lt;code&gt;(= times 0)&lt;/code&gt; in the &lt;em&gt;predicate expression&lt;/em&gt; in &lt;code&gt;repeated&lt;/code&gt;, rounding log&lt;sub&gt;2&lt;/sub&gt;n can be avoided.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;h1 id=&quot;end&quot;&gt;END&lt;/h1&gt;
+&lt;p&gt;&lt;strong&gt;希望我的小喵会平安地飞回来。&lt;/strong&gt;&lt;/p&gt;
+</description>
+        <pubDate>Thu, 04 Feb 2016 00:00:00 +0800</pubDate>
+        <link>http://willx8.github.io/2016/02/04/SICP-chapter1/</link>
+        <guid isPermaLink="true">http://willx8.github.io/2016/02/04/SICP-chapter1/</guid>
+        
+        <category>Scheme</category>
+        
+        <category>寒假</category>
+        
+        <category>SICP</category>
+        
+        <category>读书笔记</category>
+        
+        <category>Functional Programming</category>
+        
+        
+      </item>
     
       <item>
         <title> Hello 2016 &amp; Winter Vacation</title>
@@ -48,10 +275,7 @@
 
 &lt;p&gt;重写了两次master.go的代码，感觉最后一版简洁舒服多了。原来设计成iterate through all jobs and assign them to workers in a new gorouine.后来改成create a goroutine for each worker, who retrieves job from joblist every time it finishes a job.效率提高不上，也增加了代码重用率。不过我没有让map&amp;amp;reduce同时进行，而是先让所有worker do map，再一起do reduce，是可以改进的地方。&lt;/p&gt;
 
-&lt;p&gt;等Lab2写完再一起更。&lt;br /&gt;
-*   aa&lt;br /&gt;
-*   aa&lt;br /&gt;
-*   sdad&lt;/p&gt;
+&lt;p&gt;等Lab2写完再一起更。&lt;/p&gt;
 
 &lt;h3 id=&quot;ssc&quot;&gt;3. 写两个&lt;s&gt;可能烂尾的&lt;/s&gt;C++贪吃蛇&lt;/h3&gt;
 &lt;p&gt;看到一种说法，自己写几个项目(from scratch)是挺有必要的，是练习语言的好机会。而且，能在写的过程中学习设计模式、 版本控制等等，这是写大作业核心代码比不了的。&lt;/p&gt;

@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="SE@SJTU 会一点C++/Go/Python/C/Java/Scheme 对分布式/机器学习感兴趣 编程/平面设计/美">
+    <meta name="keyword"  content="吴翔, willx8, 吴翔的博客, Will'X Blog, 博客, 个人网站, 技术, 设计">
+    <link rel="shortcut icon" href="/img/favicon.ico">
+
+    <title>A Review of SICP Chapter1 - 吴翔的博客 | Will'X Blog</title>
+
+    <link rel="canonical" href="http://willx8.github.io/2016/02/04/SICP-chapter1/">
+
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/hux-blog.min.css">
+
+    <!-- Pygments Github CSS -->
+    <link rel="stylesheet" href="/css/syntax.css">
+
+    <!-- Custom Fonts -->
+    <!-- <link href="http://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css"> -->
+    <!-- Hux change font-awesome CDN to qiniu -->
+    <link href="http://cdn.staticfile.org/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+
+    <!-- Hux Delete, sad but pending in China
+    <link href='http://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/
+    css'>
+    -->
+
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- ga & ba script hoook -->
+    <script></script>
+</head>
+
+
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="">
+
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">Will'X Blog</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+                    
+                    <li>
+                        <a href="/about/">About</a>
+                    </li>
+                    
+                    <li>
+                        <a href="/portfolio/">Portfolio</a>
+                    </li>
+                    
+                    <li>
+                        <a href="/tags/">Tags</a>
+                    </li>
+                    
+                </ul>
+            </div>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    var __HuxNav__ = {
+        close: function(){
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        },
+        open: function(){
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+
+    // Bind Event
+    $toggle.addEventListener('click', function(e){
+        if ($navbar.className.indexOf('in') > 0) {
+            __HuxNav__.close()
+        }else{
+            __HuxNav__.open()
+        }
+    })
+
+    /**
+     * Since Fastclick is used to delegate 'touchstart' globally
+     * to hack 300ms delay in iOS by performing a fake 'click',
+     * Using 'e.stopPropagation' to stop 'touchstart' event from 
+     * $toggle/$collapse will break global delegation.
+     * 
+     * Instead, we use a 'e.target' filter to prevent handler
+     * added to document close HuxNav.  
+     *
+     * Also, we use 'click' instead of 'touchstart' as compromise
+     */
+    document.addEventListener('click', function(e){
+        if(e.target == $toggle) return;
+        if(e.target.className == 'icon-bar') return;
+        __HuxNav__.close();
+    })
+</script>
+
+
+    <!-- Image to hack wechat -->
+<!-- <img src="/img/icon_wechat.png" width="0" height="0"> -->
+<!-- <img src="/img/post-bg-sicp-chp1.jpg" width="0" height="0"> -->
+
+<!-- Post Header -->
+<style type="text/css">
+    header.intro-header{
+        background-image: url('/img/post-bg-sicp-chp1.jpg')
+    }
+</style>
+<header class="intro-header" >
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                        <a class="tag" href="/tags/#Scheme" title="Scheme">Scheme</a>
+                        
+                        <a class="tag" href="/tags/#寒假" title="寒假">寒假</a>
+                        
+                        <a class="tag" href="/tags/#SICP" title="SICP">SICP</a>
+                        
+                        <a class="tag" href="/tags/#读书笔记" title="读书笔记">读书笔记</a>
+                        
+                        <a class="tag" href="/tags/#Functional Programming" title="Functional Programming">Functional Programming</a>
+                        
+                    </div>
+                    <h1>A Review of SICP Chapter1</h1>
+                    
+                    
+                    <h2 class="subheading"></h2>
+                    
+                    <span class="meta">Posted by William on February 4, 2016</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+
+    <!-- Post Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+				<blockquote>
+  <p>“A computational process is indeed much like a sorcerer’s idea of a spirit. “<br />
+<!--more--></p>
+</blockquote>
+
+<p>刚刚看完SICP第一章，Building Abstractions with Procedures.</p>
+
+<p><a href="https://github.com/willx8/sicp-log/blob/master/chp1/SICP-C1.scm">这里是我的第一章<s>跳了不少题的</s>题解。</a></p>
+
+<p>写一篇读书笔记，算是让自己回顾一下。只提几个有趣之处。</p>
+
+<s>实在找不到好看的题图就只好自己做了张。</s>
+
+<h1 id="evaluation">1.Evaluation</h1>
+<p>Exercise 1.5可以看到两种方式(applicative-order evaluation &amp; normal-order)的区别，为了避免一句话里中英夹杂让人不爽，下面有些解答直接用英文了。</p>
+
+<h3 id="exercise-15">Exercise 1.5.</h3>
+<p>Ben Bitdiddle has invented a test to determine whether the interpreter he is faced with is using applicative-order evaluation or normal-order evaluation. He defines the following two procedures:</p>
+
+<pre><code class="language-scheme">(define (p) (p))
+
+(define (test x y)
+  (if (= x 0)
+      0
+      y))
+</code></pre>
+
+<p>Then he evaluates the expression</p>
+
+<pre><code class="language-scheme">(test 0 (p))
+</code></pre>
+
+<p>What behavior will Ben observe with an interpreter that uses applicative-order evaluation? What behavior will he observe with an interpreter that uses normal-order evaluation? Explain your answer. (Assume that the evaluation rule for the special form if is the same whether the interpreter is using normal or applicative order: The predicate expression is evaluated first, and the result determines whether to evaluate the consequent or the alternative expression.)</p>
+
+<h3 id="solution-15">Solution 1.5.</h3>
+<ul>
+  <li>If an interpreter uses normal-order evaluation:<br />
+<code>(test 0 (p))</code> will be evaluated <code>(if (= 0 0) 0 p)</code>. Then “the predicate expression is evaluated first”, thus <code>(= 0 0)</code> generate true, the result shall be <code>0</code>.</li>
+  <li>If an interpreter uses applicative-order evalution:<br />
+<code>(test 0 (p))</code> will be <code>(test 0 (p))</code>, intepreter ‘substitute’ <code>(p)</code> for <code>(p)</code> forever, the answer will never be genearted.</li>
+</ul>
+
+<hr />
+
+<p>下面关于new-if的题可以和上面这道连起来看：</p>
+
+<h3 id="exercise-16">Exercise 1.6.</h3>
+<p>Alyssa P. Hacker doesn’t see why if needs to be provided as a special form. ``Why can’t I just define it as an ordinary procedure in terms of cond?’’ she asks. Alyssa’s friend Eva Lu Ator claims this can indeed be done, and she defines a new version of if:</p>
+
+<pre><code class="language-scheme">(define (new-if predicate then-clause else-clause)
+  (cond (predicate then-clause)
+        (else else-clause)))
+</code></pre>
+
+<p>Eva demonstrates the program for Alyssa:</p>
+
+<pre><code class="language-scheme">(new-if (= 2 3) 0 5)
+5
+
+(new-if (= 1 1) 0 5)
+0
+</code></pre>
+
+<p>Delighted, Alyssa uses new-if to rewrite the square-root program:</p>
+
+<pre><code class="language-scheme">(define (sqrt-iter guess x)
+  (new-if (good-enough? guess x)
+          guess
+          (sqrt-iter (improve guess x)
+                     x)))
+</code></pre>
+<p>What happens when Alyssa attempts to use this to compute square roots? Explain.</p>
+
+<h3 id="solution-16">Solution 1.6.</h3>
+<p>Since our interpreter uses applicative-order evaluation, new-if is interpreted later than &lt;else-clause&gt;. The interpreter evaluates &lt;predicate expression&gt;. Then it evaluates &lt;else-clause&gt;: we have <code>(improve guess x)</code> evaluated first, call it <code>y1</code> , then <code>sqrt-iter</code> evaluated:</p>
+
+<pre><code class="language-scheme">(define (sqrt-iter guess x)
+  (new-if &lt;some-evaluated-value&gt;
+          guess
+          ((new-if (good-enough? y0 x)
+          		guess
+	          	(sqrt-iter (improve y0 x)
+                     		x)))))
+</code></pre>
+<p>Since no branch decision is made due to the late-evaluation of <code>new-if</code>, there will be an infinite substition of <code>sqrt-iter</code>.</p>
+
+<hr />
+
+<h1 id="section">2.花式斐波那契</h1>
+<p>1.2.4的练习题很巧妙<br />
+一步一步地引到1.19上，教你把一次求斐波那契数列下一项的过程看做一次变换<em>T</em>，如果找到等价于运用两次变换<em>T</em>的变换<em>T’</em>，由于找到了<em>T</em>的“平方”，就可以像快速幂一样用O(log n)的速度求出答案。而<em>T</em>实际就是矩阵乘法，所谓两次<em>T</em>变换就是矩阵的平方。所以这题也可以看成是矩阵乘法的“快速幂”。看题：</p>
+
+<h3 id="exercies-119">Exercies 1.19.</h3>
+
+<p>There is a clever algorithm for computing the Fibonacci numbers in a logarithmic number of steps.</p>
+
+<p>Recall the transformation of the state variables <em>a</em> and <em>b</em> in the <tt>fib-iter</tt> process of section 1.2.2: <em>a</em> &lt;- <em>a</em> + <em>b</em> and <em>b</em> &lt;-<em>a</em>.  Call this transformation <em>T</em>, and observe that applying <em>T</em> over and over again <em>n</em> times, starting with 1 and 0, produces the pair <em>F</em><em>i</em><em>b</em>(<em>n + 1</em>) and  <em>F</em><em>i</em><em>b</em>(<em>n</em>).  In other words, the Fibonacci numbers are produced by applying <em>T</em><sup><em>n</em></sup>, the <em>n</em>th power of the transformation <em>T</em>, starting with the pair (1,0).  Now consider <em>T</em> to be the special case of <em>p</em> = 0 and <em>q</em> = 1 in a family of transformations <em>T</em><sub><em>p</em><em>q</em></sub>, where <em>T</em><sub><em>p</em><em>q</em></sub> transforms the pair <em>(a, b)</em> according to <em>a</em> &lt;- <em>b</em><em>q</em> + <em>a</em><em>q</em> + <em>a</em><em>p</em> and <em>b</em> &lt;- <em>b</em><em>p</em> + <em>a</em><em>q</em>.</p>
+
+<p>Show that if we apply such a transformation <em>T</em><sub><em>p</em><em>q</em></sub> twice, the effect is the same as using a single transformation <em>T<sub>p’q’</sub></em> of the same form, and compute <em>p</em>’ and <em>q</em>’ in terms of <em>p</em> and <em>q</em>.  This gives us an explicit way to square these transformations, and thus we can compute <em>T</em><sup><em>n</em></sup> using successive squaring, as in the <tt>fast-expt</tt> procedure.  Put this all together to complete the following procedure, which runs in a logarithmic number of steps:</p>
+
+<pre><code class="language-scheme">(define (fib n)
+  (fib-iter 1 0 0 1 n))
+(define (fib-iter a b p q count)
+  (cond ((= count 0) b)
+        ((even? count)
+         (fib-iter a
+                   b
+                   &lt;??&gt;      ; compute p'
+                   &lt;??&gt;      ; compute q'
+                   (/ count 2)))
+        (else (fib-iter (+ (* b q) (* a q) (* a p))
+                        (+ (* b p) (* a q))
+                        p
+                        q
+                        (- count 1)))))
+</code></pre>
+
+<h3 id="solution-119">Solution 1.19.</h3>
+
+<p>Notice that:</p>
+
+<math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
+<mrow><mfenced open="(" close=")"><mtable><mtr><mtd><mrow><mi>p</mi><mo>+</mo><mi>q</mi></mrow></mtd><mtd><mrow><mi>q</mi></mrow></mtd></mtr><mtr><mtd><mrow></mrow></mtd></mtr><mtr><mtd><mrow></mrow></mtd></mtr><mtr><mtd><mrow><mi>r</mi><mi>q</mi></mrow></mtd><mtd><mrow><mi>p</mi></mrow></mtd></mtr></mtable></mfenced><mfenced><mfrac linethickness="0"><mrow><mrow><msub><mrow><mi>a</mi></mrow><mrow><mrow><mi>n</mi></mrow></mrow></msub></mrow></mrow><mrow><mrow><msub><mrow><mi>b</mi></mrow><mrow><mrow><mi>n</mi></mrow></mrow></msub></mrow></mrow></mfrac></mfenced><mo>=</mo><mfenced><mfrac linethickness="0"><mrow><mrow><msub><mrow><mi>a</mi></mrow><mrow><mrow><mi>n</mi></mrow></mrow></msub><mo>(</mo><mi>p</mi><mo>+</mo><mi>q</mi><mo>)</mo><mo>+</mo><msub><mrow><mi>b</mi></mrow><mrow><mrow><mi>n</mi></mrow></mrow></msub><mi>q</mi></mrow></mrow><mrow><mrow><msub><mrow><mi>a</mi></mrow><mrow><mrow><mi>n</mi></mrow></mrow></msub><mi>q</mi><mo>+</mo><msub><mrow><mi>b</mi></mrow><mrow><mrow><mi>n</mi></mrow></mrow></msub><mi>p</mi></mrow></mrow></mfrac></mfenced><mo>=</mo><mfenced><mfrac linethickness="0"><mrow><mrow><msub><mrow><mi>a</mi></mrow><mrow><mrow><mi>n</mi><mo>+</mo><mn>1</mn></mrow></mrow></msub></mrow></mrow><mrow><mrow><msub><mrow><mi>b</mi></mrow><mrow><mrow><mi>n</mi><mo>+</mo><mn>1</mn></mrow></mrow></msub></mrow></mrow></mfrac></mfenced></mrow></math>
+
+<p>Which indicates the transformation <em>T</em> can be regard as matrix multiplication, or linear transformation. Thus applying <em>T</em> twice is merely square a matrix:</p>
+
+<math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
+<mrow><msup><mrow><mfenced open="(" close=")"><mtable><mtr><mtd><mrow><mi>p</mi><mo>+</mo><mi>q</mi></mrow></mtd><mtd><mrow><mi>q</mi></mrow></mtd></mtr><mtr><mtd><mrow></mrow></mtd></mtr><mtr><mtd><mrow></mrow></mtd></mtr><mtr><mtd><mrow><mi>r</mi><mi>q</mi></mrow></mtd><mtd><mrow><mi>p</mi></mrow></mtd></mtr></mtable></mfenced></mrow><mrow><mrow><mn>2</mn></mrow></mrow></msup><mo>=</mo><mfenced open="(" close=")"><mtable><mtr><mtd><mrow><msup><mrow><mi>p</mi></mrow><mrow><mrow><mn>2</mn></mrow></mrow></msup><mo>+</mo><mn>2</mn><mi>p</mi><mi>q</mi><mo>+</mo><mn>2</mn><msup><mrow><mi>q</mi></mrow><mrow><mrow><mn>2</mn></mrow></mrow></msup></mrow></mtd><mtd><mrow><mn>2</mn><mi>p</mi><mi>q</mi><mo>+</mo><msup><mrow><mi>q</mi></mrow><mrow><mrow><mn>2</mn></mrow></mrow></msup></mrow></mtd></mtr><mtr><mtd><mrow></mrow></mtd></mtr><mtr><mtd><mrow></mrow></mtd></mtr><mtr><mtd><mrow><mi>r</mi><mn>2</mn><mi>p</mi><mi>q</mi><mo>+</mo><msup><mrow><mi>q</mi></mrow><mrow><mrow><mn>2</mn></mrow></mrow></msup></mrow></mtd><mtd><mrow><msup><mrow><mi>p</mi></mrow><mrow><mrow><mn>2</mn></mrow></mrow></msup><mo>+</mo><msup><mrow><mi>q</mi></mrow><mrow><mrow><mn>2</mn></mrow></mrow></msup></mrow></mtd></mtr></mtable></mfenced></mrow></math>
+
+<p>We derive a new matrix in the same form of the former one, where</p>
+
+<p><em>p’ = p<sup>2</sup>+q<sup>2</sup>, q’ = 2pq+q<sup>2</sup>,</em></p>
+
+<p>which is the answer we are looking for.</p>
+
+<hr />
+
+<h1 id="fermat-test">3. Fermat Test</h1>
+<p>这部分用费马小定理做质数检验的内容挺有趣。这是一个把指数检验的时间复杂度从O(n<sup>1/2</sup>)降到O(log n)的<em>probabilistic methods</em>. 注释47的一段话很有意思：<br />
+&gt; In testing primality of very large numbers chosen at random, the chance of stumbling upon a value that fools the Fermat test is less than the chance that cosmic radiation will cause the computer to make an error in carrying out a “correct” algorithm. Considering an algorithm to be inadequate for the first reason but not for the second illustrates the difference between mathematics and engineering.</p>
+
+<hr />
+
+<h1 id="lambda">4. Lambda大法好</h1>
+<p>1.3节大概是真的开始函数式编程了。这一节每组题基本都层层递进，不断往高层次抽象过程，很有趣，像我这样喜欢跳题的全做了，有兴趣可以看我的题解。两道题值得再提一下。</p>
+
+<h3 id="exercise-141">Exercise 1.41.</h3>
+
+<p>Define a procedure double that takes a procedure of one argument as argument and returns a procedure that applies the original procedure twice. For example, if inc is a procedure that adds 1 to its argument, then (double inc) should be a procedure that adds 2. What value is returned by<code>(((double (double double)) inc) 5)</code></p>
+
+<h3 id="solution-141">Solution 1.41:</h3>
+
+<pre><code class="language-scheme">(define (double f)
+  (lambda (i) (f (f i))))
+</code></pre>
+<p>21</p>
+
+<h3 id="section-1">补充</h3>
+
+<p>值得注意的是语法。我们会发现这句话<code>(((double (double double)) inc) 5)</code>其实和下面是等价的：</p>
+
+<pre><code class="language-scheme">((((lambda (i) (double (double i)))
+ double) inc)
+ 5)
+</code></pre>
+<p>而<code>inc</code>竟然能这样作为参数被进新的procedure<code>(double (double double))</code>中。我觉得，毕竟还是第一章，既然书里也没进一步解释，<strong>just remember that this patterns works.</strong>等后面进一步讲语法的时候再来看解释器的具体实现吧，那么这里就要挖一个坑等以后填了。</p>
+
+<hr />
+
+<h3 id="exercise-145">Exercise 1.45.</h3>
+<p>We saw in section 1.3.3 that attempting to compute square roots by naively finding a fixed point of y-&gt;x/y does not converge, and that this can be fixed by average damping. The same method works for finding cube roots as fixed points of the average-damped y-&gt;x/y<sup>2</sup>. Unfortunately, the process does not work for fourth roots – a single average damp is not enough to make a fixed-point search for y-&gt;x/y<sup>3</sup> converge. On the other hand, if we average damp twice (i.e., use the average damp of the average damp of y-&gt;x/y<sup>3</sup>) the fixed-point search does converge. Do some experiments to determine how many average damps are required to compute nth roots as a fixed-point search based upon repeated average damping of y-&gt;x/y<sup>n-1</sup>. Use this to implement a simple procedure for computing nth roots using <code>fixed-point</code>, <code>average-damp</code>, and the <code>repeated</code> procedure of exercise 1.43. Assume that any arithmetic operations you need are available as primitives.</p>
+
+<h3 id="solution-145">Solution 1.45.</h3>
+
+<pre><code class="language-scheme">(define (repeated f times)
+  (lambda (i)
+    (if (&lt;= times 0)
+        i
+        ((composition f (repeated f (- times 1))) i))))
+
+(define (n-th-root i n)
+  (fixed-point
+   ((lambda (x)
+      ((repeated average-damp (/ (log n) (log 2)))
+       (lambda (y) (/ x (fast-expt y (- n 1))))))
+    i) 1.0))
+</code></pre>
+<p><em><code>fixed-point</code> &amp; <code>average-damp</code> is omitted.</em></p>
+
+<p>After some experiments, the times of average-damp required is like:</p>
+
+<ul>
+  <li>2 ~ 3:  	1</li>
+  <li>4 ~ 7:  	2</li>
+  <li>8 ~ 15: 	3</li>
+  <li>…</li>
+  <li>2<sup>n</sup> ~ 2<sup>n+1</sup>-1: n</li>
+</ul>
+
+<p>Which leads to <em>times = log<sub>2</sub>n</em></p>
+
+<p>Notice that by using <code>(&lt;= times 0)</code> instead of <code>(= times 0)</code> in the <em>predicate expression</em> in <code>repeated</code>, rounding log<sub>2</sub>n can be avoided.</p>
+
+<hr />
+
+<h1 id="end">END</h1>
+<p><strong>希望我的小喵会平安地飞回来。</strong></p>
+
+
+                <hr>
+
+                
+
+
+                <ul class="pager">
+                    
+                    <li class="previous">
+                        <a href="/2016/01/30/hello-2016/" data-toggle="tooltip" data-placement="top" title=" Hello 2016 & Winter Vacation">
+                        Previous<br>
+                        <span> Hello 2016 & Winter Vacation</span>
+                        </a>
+                    </li>
+                    
+                    
+                </ul>
+
+
+                
+
+                
+
+            </div>
+
+    <!-- Sidebar Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+
+                <!-- Friends Blog -->
+                
+                <hr>
+                <h5>FRIENDS</h5>
+                <ul class="list-inline">
+                    
+                        <li><a href="http://myfriend/">Feel free to contact me and appear here.</a></li>
+                    
+                </ul>
+                
+            </div>
+        </div>
+    </div>
+</article>
+
+
+
+
+
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+<!-- anchor-js, Doc:http://bryanbraun.github.io/anchorjs/ -->
+<script>
+    async("http://cdn.bootcss.com/anchor-js/1.1.1/anchor.min.js",function(){
+        anchors.options = {
+          visible: 'always',
+          placement: 'right',
+          icon: '#'
+        };
+        anchors.add().remove('.intro-header h1').remove('.subheading').remove('.sidebar-container h5');
+    })
+</script>
+<style>
+    /* place left on bigger screen */
+    @media all and (min-width: 800px) {
+        .anchorjs-link{
+            position: absolute;
+            left: -0.75em;
+            font-size: 1.1em;
+            margin-top : -0.1em;
+        }
+    }
+</style>
+
+
+
+    <!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                    
+                    
+
+                    <!-- add Weibo, Zhihu by Hux, add target = "_blank" to <a> by Hux -->
+                    
+                    <li>
+                        <a target="_blank" href="https://www.zhihu.com/people/wu-ji-ao">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa  fa-stack-1x fa-inverse">知</i>
+                            </span>
+                        </a>
+                    </li>
+                    
+                    
+                    <li>
+                        <a target="_blank" href="http://weibo.com/willwhiff">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-weibo fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+
+
+                    
+                    <li>
+                        <a target="_blank" href="https://www.facebook.com/willx8">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-facebook fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+                    
+                    <li>
+                        <a target="_blank" href="https://github.com/willx8">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+                </ul>
+                <p class="copyright text-muted">
+                    Copyright &copy; Will'X Blog 2016
+                    <br>
+                    Theme © <a href="http://huangxuan.me">Hux</a> |
+                    <iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="91px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=huxpro&repo=huxpro.github.io&type=star&count=true" >
+                    </iframe>
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- jQuery -->
+<script src="/js/jquery.min.js "></script>
+
+<!-- Bootstrap Core JavaScript -->
+<script src="/js/bootstrap.min.js "></script>
+
+<!-- Custom Theme JavaScript -->
+<script src="/js/hux-blog.min.js "></script>
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+<!-- Highlight.js -->
+<script>
+    async("http://cdn.bootcss.com/highlight.js/8.6/highlight.min.js", function(){
+        hljs.initHighlightingOnLoad();
+    })
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async("/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+<link href="http://cdn.bootcss.com/highlight.js/8.6/styles/github.min.css" rel="stylesheet">
+
+<!--fastClick.js -->
+<script>
+    async("http://cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+        // var $nav = document.querySelector("nav");
+        // if($nav) FastClick.attach($nav);
+
+        // global FastClick!!
+        FastClick.attach(document.body);    
+    })
+</script>
+
+
+<!-- Google Analytics -->
+
+
+
+<!-- Baidu Tongji -->
+
+
+
+
+<!-- Image to hack wechat -->
+<img src="/img/icon_wechat.png" width="0" height="0" />
+<!-- Migrate from head to bottom, no longer block render and still work -->
+
+</body>
+
+</html>

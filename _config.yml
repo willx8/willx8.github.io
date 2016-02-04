@@ -33,7 +33,10 @@ paginate: 10
 exclude: ["less","node_modules","Gruntfile.js","package.json","README.md"]
 anchorjs: true                          # if you want to customize anchor. check out line:181 of `post.html`
 
-
+    #syntax highlighting
+    #syntax-highlighting:
+    #  enabled : true
+    #  css: syntax.css
 
 # Markdown settings
 # replace redcarpet to kramdown,
