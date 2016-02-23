@@ -5,19 +5,17 @@
     <description>SE@SJTU 会一点C++/Go/Python/C/Java/Scheme 编程/平面设计/美</description>
     <link>http://willx8.github.io/</link>
     <atom:link href="http://willx8.github.io/feed.xml" rel="self" type="application/rss+xml" />
-    <pubDate>Tue, 23 Feb 2016 16:06:45 +0800</pubDate>
-    <lastBuildDate>Tue, 23 Feb 2016 16:06:45 +0800</lastBuildDate>
+    <pubDate>Tue, 23 Feb 2016 16:16:00 +0800</pubDate>
+    <lastBuildDate>Tue, 23 Feb 2016 16:16:00 +0800</lastBuildDate>
     <generator>Jekyll v2.4.0</generator>
     
       <item>
         <title>6.824 Lab2: Fault-tolerant</title>
-        <description>&lt;h1 id=&quot;lab2&quot;&gt;Lab2&lt;/h1&gt;
+        <description>&lt;p&gt;开学快乐。&lt;/p&gt;
 
-&lt;p&gt;开学快乐。&lt;/p&gt;
+&lt;p&gt;由于摸鱼癌发作，在“春节为什么要学习”的自我催眠中度过了剩下的寒假，现在我已经来到了闵大荒。把这篇6.824的&lt;strong&gt;Lab2&lt;/strong&gt;补完吧。其实6.824除了lab之外，主页上还有很多lecture的note和课前读的paper，都是很不错的资料。&lt;/p&gt;
 
-&lt;p&gt;由于摸鱼癌发作，在“春节为什么要学习”的自我催眠中度过了剩下的寒假，现在我已经来到了闵大荒。把这篇6.824的Lab2补完吧。其实6.824除了lab之外，主页上还有很多lecture的note和课前读的paper，都是很不错的资料。&lt;/p&gt;
-
-&lt;p&gt;简单说，这个lab就是让我们深入体会fault-tolerant的。&lt;/p&gt;
+&lt;p&gt;简单说，&lt;strong&gt;Lab2&lt;/strong&gt;就是让我们深入体会fault-tolerant的。&lt;/p&gt;
 
 &lt;h2 id=&quot;part-a-the-view-service&quot;&gt;Part A: The view service&lt;/h2&gt;
 &lt;p&gt;这一部分比较简单，Lab介绍也是这样说的。根据介绍搞清楚view service的原理之后，用几个if-else就可以解决，跑过test没有太大问题。&lt;/p&gt;
@@ -130,7 +128,8 @@
 
 &lt;p&gt;对了，可以用&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;&amp;gt; go test -run TestXXX
+&lt;pre&gt;&lt;code class=&quot;language-bash&quot;&gt;
+&amp;gt; go test -run TestXXX
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;来跑特定的测试函数TestXXX。&lt;/p&gt;
@@ -219,6 +218,8 @@ func main() {
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;结果便会是 “world! world!”&lt;/p&gt;
+
+&lt;hr /&gt;
 
 </description>
         <pubDate>Tue, 23 Feb 2016 00:00:00 +0800</pubDate>
