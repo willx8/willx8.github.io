@@ -5,9 +5,234 @@
     <description>SE@SJTU 会一点C++/Go/Python/C/Java/Scheme 编程/平面设计/美</description>
     <link>http://willx8.github.io/</link>
     <atom:link href="http://willx8.github.io/feed.xml" rel="self" type="application/rss+xml" />
-    <pubDate>Mon, 08 Feb 2016 11:19:04 +0800</pubDate>
-    <lastBuildDate>Mon, 08 Feb 2016 11:19:04 +0800</lastBuildDate>
+    <pubDate>Tue, 23 Feb 2016 16:06:45 +0800</pubDate>
+    <lastBuildDate>Tue, 23 Feb 2016 16:06:45 +0800</lastBuildDate>
     <generator>Jekyll v2.4.0</generator>
+    
+      <item>
+        <title>6.824 Lab2: Fault-tolerant</title>
+        <description>&lt;h1 id=&quot;lab2&quot;&gt;Lab2&lt;/h1&gt;
+
+&lt;p&gt;开学快乐。&lt;/p&gt;
+
+&lt;p&gt;由于摸鱼癌发作，在“春节为什么要学习”的自我催眠中度过了剩下的寒假，现在我已经来到了闵大荒。把这篇6.824的Lab2补完吧。其实6.824除了lab之外，主页上还有很多lecture的note和课前读的paper，都是很不错的资料。&lt;/p&gt;
+
+&lt;p&gt;简单说，这个lab就是让我们深入体会fault-tolerant的。&lt;/p&gt;
+
+&lt;h2 id=&quot;part-a-the-view-service&quot;&gt;Part A: The view service&lt;/h2&gt;
+&lt;p&gt;这一部分比较简单，Lab介绍也是这样说的。根据介绍搞清楚view service的原理之后，用几个if-else就可以解决，跑过test没有太大问题。&lt;/p&gt;
+
+&lt;p&gt;当然，如同Lab介绍所说，即使你的view service跑过Part A的测试，也有可能在Part B里出错。我就遇到了这样的情况，问题在dead primary上。介绍说：&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;If the view service has not yet received an acknowledgment for the current view from the primary of the current view, the view service should not change views even if it thinks that the primary or backup has died.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;也就是说：&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;
+    &lt;p&gt;Which view? Current view, not next view.&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;Which primary? Current primary, not primary of the next view.&lt;/p&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;不同的primary failure对应不同的处理方式，比如：&lt;/p&gt;
+
+&lt;p&gt;&lt;em&gt;我们约定用{primary, backup, view number}来描述一个view, ““表示没有服务器&lt;/em&gt;&lt;/p&gt;
+
+&lt;h4 id=&quot;case-1&quot;&gt;CASE 1&lt;/h4&gt;
+
+&lt;p&gt;&lt;em&gt;Assuming no idle server in this case.&lt;/em&gt;&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;
+    &lt;p&gt;current view: {s1, , 1} &lt;em&gt;(Assuming that s1 has &lt;strong&gt;acknowledged&lt;/strong&gt; this view)&lt;/em&gt;&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;s1 die.&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;start s2.&lt;/p&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;最终会变成什么view？&lt;/p&gt;
+
+&lt;p&gt;答：{s1, s2, 2}.&lt;/p&gt;
+
+&lt;p&gt;因为：&lt;/p&gt;
+
+&lt;p&gt;s2: ping(0). reply: {s1, s2, 2} (s1 has ACKed view 1)&lt;/p&gt;
+
+&lt;p&gt;s2: ping(2). reply: {s1, s2, 2} (s1 has not ACKed view 2, so we can’t proceed to view 3 {s2, , 3})&lt;/p&gt;
+
+&lt;p&gt;…&lt;/p&gt;
+
+&lt;h4 id=&quot;case-2&quot;&gt;CASE 2&lt;/h4&gt;
+
+&lt;p&gt;&lt;em&gt;Assuming no idle server in this case.&lt;/em&gt;&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;
+    &lt;p&gt;current view: {s1, , 1} &lt;em&gt;(Assuming that s1 has &lt;strong&gt;acknowledged&lt;/strong&gt; this view)&lt;/em&gt;&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;start s2.&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;s1 die. &lt;em&gt;(Asumming s2 has started long enough.)&lt;/em&gt;&lt;/p&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;最终会变成什么view？&lt;/p&gt;
+
+&lt;p&gt;答：{s2, , 3}.&lt;/p&gt;
+
+&lt;p&gt;因为：&lt;/p&gt;
+
+&lt;p&gt;s2: ping(0). reply: {s1, s2, 2}&lt;/p&gt;
+
+&lt;p&gt;s2: ping(2). reply: {s1, s2, 2}&lt;/p&gt;
+
+&lt;p&gt;s1: ping(1). reply: {s1, s2, 2}&lt;/p&gt;
+
+&lt;p&gt;s1: ping(2). reply: {s1, s2, 2} (Now s1 has ACKed view 2)&lt;/p&gt;
+
+&lt;p&gt;…&lt;/p&gt;
+
+&lt;p&gt;s1 die.&lt;/p&gt;
+
+&lt;p&gt;s2: ping(2). reply: {s2, , 3} (Since s1 has ACKed view 2)&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;这两个case说明了uninitialized server can’t become primary.&lt;/strong&gt;&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;h2 id=&quot;part-b-primarybackup-service&quot;&gt;Part B: primary/backup service&lt;/h2&gt;
+
+&lt;p&gt;Part B的test_test.go近千行，比Part A的长的多，对我而言按照Lab要求完成后基本能跑过TestBasicFail，之后就是…test-driven-programming了。&lt;/p&gt;
+
+&lt;p&gt;所以接下来的内容也是test-driven的，以下是除了TestBasicFail之外的所有Test名称：&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;TestAtMostOnce&lt;/li&gt;
+  &lt;li&gt;TestFailPut&lt;/li&gt;
+  &lt;li&gt;TestConcurrentSame&lt;/li&gt;
+  &lt;li&gt;TestConcurrentSameUnreliable&lt;/li&gt;
+  &lt;li&gt;TestRepeatedCrash&lt;/li&gt;
+  &lt;li&gt;TestRepeatedCrashUnreliable&lt;/li&gt;
+  &lt;li&gt;TestPartition1&lt;/li&gt;
+  &lt;li&gt;TestPartition2&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;对了，可以用&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;&amp;gt; go test -run TestXXX
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;来跑特定的测试函数TestXXX。&lt;/p&gt;
+
+&lt;h3 id=&quot;testatmostonce&quot;&gt;TestAtMostOnce&lt;/h3&gt;
+
+&lt;p&gt;即采用at-most-once策略。当出现server收到put/get，但reply丢包或time-out致使client认为server没有收到于是再次发送put/get的情况时，server直接给出记录的上一个reply。故client的每个put/get都有一个unique Id(UID)，server端会记下UID对应的reply，并有相应的释放机制（&lt;a href=&quot;http://css.csail.mit.edu/6.824/2014/notes/l02.txt&quot;&gt;lecture2&lt;/a&gt;有提到，如约定client最多不断重试5分钟，server只会保存最近5分钟的UID。当然这个lab不需要实现这个机制）。&lt;/p&gt;
+
+&lt;p&gt;同时，client若没收到reply(call timeout)或收到空reply，则再隔一定时间向server发送request直到收到非空reply。&lt;/p&gt;
+
+&lt;h3 id=&quot;testfailput&quot;&gt;TestFailPut&lt;/h3&gt;
+
+&lt;p&gt;要保证backup被初始化，即新backup出现时，primary会向backup发送所有primary记录的key-value。这样即使primary fail了，backup也会拥有原来的数据。&lt;/p&gt;
+
+&lt;p&gt;这一部分也就是hint所说的&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;you’ll probably need to create new RPCs to handle the transfer of the complete key/value database from the primary to a new backup.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;我的实现是为server添加raw属性，raw backup server在&lt;code&gt;tick&lt;/code&gt;（而不是&lt;code&gt;StartServer&lt;/code&gt;中，否则无法初始化从idle server列表中提拔上来的backup，也无法在失败后重试）里都会向primary发送RPC请求，primary收到后会把现在所有的key/value复制给backup.&lt;/p&gt;
+
+&lt;h3 id=&quot;testconcurrentsame&quot;&gt;TestConcurrentSame&lt;/h3&gt;
+
+&lt;p&gt;只要保证每个primary收到的put都先向backup发送一次put(from primary)再返回，问题应该不大。&lt;/p&gt;
+
+&lt;h3 id=&quot;testconcurrentsameunreliable&quot;&gt;TestConcurrentSameUnreliable&lt;/h3&gt;
+
+&lt;p&gt;所有后缀Unreliable的test都是使用了模拟的不稳定RPC，有一定概率（10%）server端什么都没收到(无request)，一定概率（20%）server无返回(reply为空)，分别模拟进出网络的故障。而且Unreliable的test往往用PutHash，因此必须严格保证at-most-once.&lt;/p&gt;
+
+&lt;p&gt;&lt;em&gt;TestAtMostOnce&lt;/em&gt;已经提到解决方法。&lt;/p&gt;
+
+&lt;h3 id=&quot;testrepeatedcrash&quot;&gt;TestRepeatedCrash&lt;/h3&gt;
+
+&lt;p&gt;Server端不断地crash&amp;amp;restart，但client端始终能保持稳定的put/get. 所有的备份，包括新backup向primary要备份，primary的每个put/get都向backup备份做好即可。&lt;/p&gt;
+
+&lt;h3 id=&quot;testrepeatedcrashunreliable&quot;&gt;TestRepeatedCrashUnreliable&lt;/h3&gt;
+
+&lt;p&gt;如&lt;em&gt;TestConcurrentSameUnreliable&lt;/em&gt;所述，所有后缀Unreliable都是类似的。&lt;/p&gt;
+
+&lt;h3 id=&quot;testpartition12&quot;&gt;TestPartition1&amp;amp;2&lt;/h3&gt;
+
+&lt;p&gt;这个test用了延迟的get，当get到达原来的primary s1时，由于s1久未ping view server, view server记录的当前view的primary已经不是s1. 且get的key对应的value已经改变。&lt;/p&gt;
+
+&lt;p&gt;对于server而言，当自己不是primary时，应当拒绝所有不来自primary的put/get；当自己是primary时，所有来自client的put/get需要再向backup备份，若backup拒绝（因为自己所知的更高的view里发送方不再是primary）了request，则向client返回错误。&lt;/p&gt;
+
+&lt;p&gt;Client的put/get会一直尝试到server成功put/get, 所以无论如何都不会获取原来的key对应的值，而是在数次尝试失败后重新向view server询问当前view，得知新的primary，再向该primary发送put/get.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;h2 id=&quot;section&quot;&gt;其他&lt;/h2&gt;
+
+&lt;h3 id=&quot;golang&quot;&gt;Golang的指针&lt;/h3&gt;
+
+&lt;p&gt;golang返回指针比C方便，即使是局部变量的指针也可以正常返回。但指针作为参数时和C还是很接近的。&lt;/p&gt;
+
+&lt;p&gt;由于没有注意指针的使用，我的client一直收不到put reply，即primary server已经完成put了但是client那边收到的reply一直是空。因为那个test case刚好是unreliable后缀的，让我一度觉得是unreliable的问题……&lt;/p&gt;
+
+&lt;p&gt;总结一下就是，猜猜下面这段代码会输出什么呢？&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-golang&quot;&gt;package main
+
+import &quot;fmt&quot;
+
+type PutReply struct {
+	s string
+}
+
+func call(reply *PutReply) *PutReply {
+	reply = &amp;amp;PutReply{&quot;world!&quot;}
+	return reply
+}
+
+func main() {
+	reply := PutReply{&quot;Hello,&quot;}
+	nr := call(&amp;amp;reply)
+	fmt.Println(reply.s, nr.s)
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;答：”Hello, wrold!”&lt;/p&gt;
+
+&lt;p&gt;如果用&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&quot;language-golang&quot;&gt;*reply = &amp;amp;PutReply{&quot;world!&quot;}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;结果便会是 “world! world!”&lt;/p&gt;
+
+</description>
+        <pubDate>Tue, 23 Feb 2016 00:00:00 +0800</pubDate>
+        <link>http://willx8.github.io/2016/02/23/6824-lab2/</link>
+        <guid isPermaLink="true">http://willx8.github.io/2016/02/23/6824-lab2/</guid>
+        
+        <category>寒假</category>
+        
+        <category>6.824</category>
+        
+        <category>分布式系统</category>
+        
+        
+      </item>
     
       <item>
         <title>Happy Birthday!</title>

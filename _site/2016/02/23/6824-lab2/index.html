@@ -10,9 +10,9 @@
     <meta name="keyword"  content="吴翔, willx8, 吴翔的博客, Will'X Blog, 博客, 个人网站, 技术, 设计">
     <link rel="shortcut icon" href="/img/favicon.ico">
 
-    <title>Happy Birthday! - 吴翔的博客 | Will'X Blog</title>
+    <title>6.824 Lab2: Fault-tolerant - 吴翔的博客 | Will'X Blog</title>
 
-    <link rel="canonical" href="http://willx8.github.io/2016/02/08/syl-birthday/">
+    <link rel="canonical" href="http://willx8.github.io/2016/02/23/6824-lab2/">
 
     <!-- Bootstrap Core CSS -->
     <link rel="stylesheet" href="/css/bootstrap.min.css">
@@ -148,12 +148,12 @@
 
     <!-- Image to hack wechat -->
 <!-- <img src="/img/icon_wechat.png" width="0" height="0"> -->
-<!-- <img src="/img/post-bg-syl-birthday.jpg" width="0" height="0"> -->
+<!-- <img src="/img/post-6824-lab2.jpg" width="0" height="0"> -->
 
 <!-- Post Header -->
 <style type="text/css">
     header.intro-header{
-        background-image: url('/img/post-bg-syl-birthday.jpg')
+        background-image: url('/img/post-6824-lab2.jpg')
     }
 </style>
 <header class="intro-header" >
@@ -163,15 +163,19 @@
                 <div class="post-heading">
                     <div class="tags">
                         
-                        <a class="tag" href="/tags/#你的生日" title="你的生日">你的生日</a>
+                        <a class="tag" href="/tags/#寒假" title="寒假">寒假</a>
+                        
+                        <a class="tag" href="/tags/#6.824" title="6.824">6.824</a>
+                        
+                        <a class="tag" href="/tags/#分布式系统" title="分布式系统">分布式系统</a>
                         
                     </div>
-                    <h1>Happy Birthday!</h1>
+                    <h1>6.824 Lab2: Fault-tolerant</h1>
                     
                     
                     <h2 class="subheading"></h2>
                     
-                    <span class="meta">Posted by William on February 8, 2016</span>
+                    <span class="meta">Posted by William on February 23, 2016</span>
                 </div>
             </div>
         </div>
@@ -189,47 +193,215 @@
                 col-md-10 col-md-offset-1
                 post-container">
 
-				<h2 id="section">小喵二十岁啦</h2>
+				<h1 id="lab2">Lab2</h1>
 
-<p>祝我最爱的宝贝生日快乐~</p>
+<p>开学快乐。</p>
 
-<p>今年你的生日正巧是大年初一。在外面鞭炮的噼里啪啦中，我们和整座城市一起庆祝~</p>
+<p>由于摸鱼癌发作，在“春节为什么要学习”的自我催眠中度过了剩下的寒假，现在我已经来到了闵大荒。把这篇6.824的Lab2补完吧。其实6.824除了lab之外，主页上还有很多lecture的note和课前读的paper，都是很不错的资料。</p>
 
-<p><strong>又爱了一整岁的你了，和你一起在闵行、上海、宁波和内斗省吃吃玩玩超开心。</strong></p>
+<p>简单说，这个lab就是让我们深入体会fault-tolerant的。</p>
 
-<p><strong>就算不是异地还是能每天和你打两个小时的电话停不下来。</strong></p>
+<h2 id="part-a-the-view-service">Part A: The view service</h2>
+<p>这一部分比较简单，Lab介绍也是这样说的。根据介绍搞清楚view service的原理之后，用几个if-else就可以解决，跑过test没有太大问题。</p>
 
-<p>因为，这是我陪你过的第三个生日了，对你的感受还是：<strong>一见倾心</strong>！</p>
+<p>当然，如同Lab介绍所说，即使你的view service跑过Part A的测试，也有可能在Part B里出错。我就遇到了这样的情况，问题在dead primary上。介绍说：</p>
 
-<p>所以，今年的礼物是<em>一见倾心</em>~</p>
+<blockquote>
+  <p>If the view service has not yet received an acknowledgment for the current view from the primary of the current view, the view service should not change views even if it thinks that the primary or backup has died.</p>
+</blockquote>
+
+<p>也就是说：</p>
+
+<ul>
+  <li>
+    <p>Which view? Current view, not next view.</p>
+  </li>
+  <li>
+    <p>Which primary? Current primary, not primary of the next view.</p>
+  </li>
+</ul>
+
+<p>不同的primary failure对应不同的处理方式，比如：</p>
+
+<p><em>我们约定用{primary, backup, view number}来描述一个view, ““表示没有服务器</em></p>
+
+<h4 id="case-1">CASE 1</h4>
+
+<p><em>Assuming no idle server in this case.</em></p>
+
+<ul>
+  <li>
+    <p>current view: {s1, , 1} <em>(Assuming that s1 has <strong>acknowledged</strong> this view)</em></p>
+  </li>
+  <li>
+    <p>s1 die.</p>
+  </li>
+  <li>
+    <p>start s2.</p>
+  </li>
+</ul>
+
+<p>最终会变成什么view？</p>
+
+<p>答：{s1, s2, 2}.</p>
+
+<p>因为：</p>
+
+<p>s2: ping(0). reply: {s1, s2, 2} (s1 has ACKed view 1)</p>
+
+<p>s2: ping(2). reply: {s1, s2, 2} (s1 has not ACKed view 2, so we can’t proceed to view 3 {s2, , 3})</p>
+
+<p>…</p>
+
+<h4 id="case-2">CASE 2</h4>
+
+<p><em>Assuming no idle server in this case.</em></p>
+
+<ul>
+  <li>
+    <p>current view: {s1, , 1} <em>(Assuming that s1 has <strong>acknowledged</strong> this view)</em></p>
+  </li>
+  <li>
+    <p>start s2.</p>
+  </li>
+  <li>
+    <p>s1 die. <em>(Asumming s2 has started long enough.)</em></p>
+  </li>
+</ul>
+
+<p>最终会变成什么view？</p>
+
+<p>答：{s2, , 3}.</p>
+
+<p>因为：</p>
+
+<p>s2: ping(0). reply: {s1, s2, 2}</p>
+
+<p>s2: ping(2). reply: {s1, s2, 2}</p>
+
+<p>s1: ping(1). reply: {s1, s2, 2}</p>
+
+<p>s1: ping(2). reply: {s1, s2, 2} (Now s1 has ACKed view 2)</p>
+
+<p>…</p>
+
+<p>s1 die.</p>
+
+<p>s2: ping(2). reply: {s2, , 3} (Since s1 has ACKed view 2)</p>
+
+<p><strong>这两个case说明了uninitialized server can’t become primary.</strong></p>
 
 <hr />
 
-<h2 id="section-1">祝福时间</h2>
+<h2 id="part-b-primarybackup-service">Part B: primary/backup service</h2>
 
-<p>你的20岁的开头正好也是新的一年的开始呢。</p>
+<p>Part B的test_test.go近千行，比Part A的长的多，对我而言按照Lab要求完成后基本能跑过TestBasicFail，之后就是…test-driven-programming了。</p>
 
-<p>小喵今年也会一如既往地：</p>
+<p>所以接下来的内容也是test-driven的，以下是除了TestBasicFail之外的所有Test名称：</p>
 
 <ul>
-  <li>好看</li>
-  <li>可爱</li>
-  <li>聪明</li>
-  <li>有趣</li>
-  <li>
-    <s> 笨！</s>
-  </li>
-  <li><strong>松弛</strong></li>
-  <li>喜欢可爱的自己</li>
-  <li>和我一起愉快地玩</li>
-  <li>想要的好事都发生</li>
+  <li>TestAtMostOnce</li>
+  <li>TestFailPut</li>
+  <li>TestConcurrentSame</li>
+  <li>TestConcurrentSameUnreliable</li>
+  <li>TestRepeatedCrash</li>
+  <li>TestRepeatedCrashUnreliable</li>
+  <li>TestPartition1</li>
+  <li>TestPartition2</li>
 </ul>
 
+<p>对了，可以用</p>
+
+<pre><code>&gt; go test -run TestXXX
+</code></pre>
+
+<p>来跑特定的测试函数TestXXX。</p>
+
+<h3 id="testatmostonce">TestAtMostOnce</h3>
+
+<p>即采用at-most-once策略。当出现server收到put/get，但reply丢包或time-out致使client认为server没有收到于是再次发送put/get的情况时，server直接给出记录的上一个reply。故client的每个put/get都有一个unique Id(UID)，server端会记下UID对应的reply，并有相应的释放机制（<a href="http://css.csail.mit.edu/6.824/2014/notes/l02.txt">lecture2</a>有提到，如约定client最多不断重试5分钟，server只会保存最近5分钟的UID。当然这个lab不需要实现这个机制）。</p>
+
+<p>同时，client若没收到reply(call timeout)或收到空reply，则再隔一定时间向server发送request直到收到非空reply。</p>
+
+<h3 id="testfailput">TestFailPut</h3>
+
+<p>要保证backup被初始化，即新backup出现时，primary会向backup发送所有primary记录的key-value。这样即使primary fail了，backup也会拥有原来的数据。</p>
+
+<p>这一部分也就是hint所说的</p>
+
 <blockquote>
-  <p>嘿嘿 我爱你</p>
+  <p>you’ll probably need to create new RPCs to handle the transfer of the complete key/value database from the primary to a new backup.</p>
 </blockquote>
 
-<p><em>呼噜。</em></p>
+<p>我的实现是为server添加raw属性，raw backup server在<code>tick</code>（而不是<code>StartServer</code>中，否则无法初始化从idle server列表中提拔上来的backup，也无法在失败后重试）里都会向primary发送RPC请求，primary收到后会把现在所有的key/value复制给backup.</p>
+
+<h3 id="testconcurrentsame">TestConcurrentSame</h3>
+
+<p>只要保证每个primary收到的put都先向backup发送一次put(from primary)再返回，问题应该不大。</p>
+
+<h3 id="testconcurrentsameunreliable">TestConcurrentSameUnreliable</h3>
+
+<p>所有后缀Unreliable的test都是使用了模拟的不稳定RPC，有一定概率（10%）server端什么都没收到(无request)，一定概率（20%）server无返回(reply为空)，分别模拟进出网络的故障。而且Unreliable的test往往用PutHash，因此必须严格保证at-most-once.</p>
+
+<p><em>TestAtMostOnce</em>已经提到解决方法。</p>
+
+<h3 id="testrepeatedcrash">TestRepeatedCrash</h3>
+
+<p>Server端不断地crash&amp;restart，但client端始终能保持稳定的put/get. 所有的备份，包括新backup向primary要备份，primary的每个put/get都向backup备份做好即可。</p>
+
+<h3 id="testrepeatedcrashunreliable">TestRepeatedCrashUnreliable</h3>
+
+<p>如<em>TestConcurrentSameUnreliable</em>所述，所有后缀Unreliable都是类似的。</p>
+
+<h3 id="testpartition12">TestPartition1&amp;2</h3>
+
+<p>这个test用了延迟的get，当get到达原来的primary s1时，由于s1久未ping view server, view server记录的当前view的primary已经不是s1. 且get的key对应的value已经改变。</p>
+
+<p>对于server而言，当自己不是primary时，应当拒绝所有不来自primary的put/get；当自己是primary时，所有来自client的put/get需要再向backup备份，若backup拒绝（因为自己所知的更高的view里发送方不再是primary）了request，则向client返回错误。</p>
+
+<p>Client的put/get会一直尝试到server成功put/get, 所以无论如何都不会获取原来的key对应的值，而是在数次尝试失败后重新向view server询问当前view，得知新的primary，再向该primary发送put/get.</p>
+
+<hr />
+
+<h2 id="section">其他</h2>
+
+<h3 id="golang">Golang的指针</h3>
+
+<p>golang返回指针比C方便，即使是局部变量的指针也可以正常返回。但指针作为参数时和C还是很接近的。</p>
+
+<p>由于没有注意指针的使用，我的client一直收不到put reply，即primary server已经完成put了但是client那边收到的reply一直是空。因为那个test case刚好是unreliable后缀的，让我一度觉得是unreliable的问题……</p>
+
+<p>总结一下就是，猜猜下面这段代码会输出什么呢？</p>
+
+<pre><code class="language-golang">package main
+
+import "fmt"
+
+type PutReply struct {
+	s string
+}
+
+func call(reply *PutReply) *PutReply {
+	reply = &amp;PutReply{"world!"}
+	return reply
+}
+
+func main() {
+	reply := PutReply{"Hello,"}
+	nr := call(&amp;reply)
+	fmt.Println(reply.s, nr.s)
+}
+</code></pre>
+
+<p>答：”Hello, wrold!”</p>
+
+<p>如果用</p>
+
+<pre><code class="language-golang">*reply = &amp;PutReply{"world!"}
+</code></pre>
+
+<p>结果便会是 “world! world!”</p>
+
 
 
                 <hr>
@@ -240,19 +412,12 @@
                 <ul class="pager">
                     
                     <li class="previous">
-                        <a href="/2016/02/04/SICP-chapter1/" data-toggle="tooltip" data-placement="top" title="A Review of SICP Chapter1">
+                        <a href="/2016/02/08/syl-birthday/" data-toggle="tooltip" data-placement="top" title="Happy Birthday!">
                         Previous<br>
-                        <span>A Review of SICP Chapter1</span>
+                        <span>Happy Birthday!</span>
                         </a>
                     </li>
                     
-                    
-                    <li class="next">
-                        <a href="/2016/02/23/6824-lab2/" data-toggle="tooltip" data-placement="top" title="6.824 Lab2: Fault-tolerant">
-                        Next<br>
-                        <span>6.824 Lab2: Fault-tolerant</span>
-                        </a>
-                    </li>
                     
                 </ul>
 
