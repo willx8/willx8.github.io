@@ -1,7 +1,7 @@
 ---
 layout:     post
 title:      "A Morgan Stanley Interview Recap | 一篇大摩面经"
-date:       2016-04-23 23:00:00
+date:       2016-04-23
 author:     "William"
 header-img: "img/ms-intern-interview.jpg"
 excerpt_separator: <!--more-->
