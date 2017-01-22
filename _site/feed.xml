@@ -5,9 +5,131 @@
     <description>SE@SJTU 会一点C++/Go/Python/C/Java/Scheme 编程/平面设计/美</description>
     <link>http://willx8.com/</link>
     <atom:link href="http://willx8.com/feed.xml" rel="self" type="application/rss+xml" />
-    <pubDate>Sun, 24 Apr 2016 10:38:39 +0800</pubDate>
-    <lastBuildDate>Sun, 24 Apr 2016 10:38:39 +0800</lastBuildDate>
+    <pubDate>Sun, 22 Jan 2017 23:48:47 +0800</pubDate>
+    <lastBuildDate>Sun, 22 Jan 2017 23:48:47 +0800</lastBuildDate>
     <generator>Jekyll v2.4.0</generator>
+    
+      <item>
+        <title>Weird thread behaviour when instrumenting Parsec using PIN</title>
+        <description>&lt;h1 id=&quot;problem&quot;&gt;Problem&lt;/h1&gt;
+
+&lt;p&gt;When using &lt;em&gt;PIN&lt;/em&gt; to instrument a &lt;em&gt;parsec-3.0&lt;/em&gt; application(i.e. &lt;code&gt;canneal&lt;/code&gt;), I encounter &lt;code&gt;C: Tool (or Pin) caused signal 11 at PC xxx&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;Some PIN application(like &lt;code&gt;malloctrace&lt;/code&gt;) does not have this problem, however when the PIN application is thread-related, e.g. we want to signal at every thread’s start:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;int main() 
+{
+  // PIN init code
+  ...
+  PIN_AddFiniFunction(Fini, 0);
+  
+  // Register Analysis routines to be called when a thread begins
+  PIN_AddThreadStartFunction(ThreadStart, 0);
+  
+  // Other instruments
+  ...
+}
+
+void ThreadStart(THREADID tid, CONTEXT *ctxt, INT32 flags, VOID *v) 
+{
+  printf(&quot;thread:%d\n&quot;, tid);
+}
+
+VOID Fini(INT32 code, VOID *v)
+{
+  printf(&quot;finish.\n&quot;);
+}
+
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;For a normal multi-thread application, instrumenting it leads to output like&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;...
+
+thread:0
+thread:1
+thread:2
+(more threads)
+
+...
+
+finish.
+
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;strong&gt;Multiple “thread”s and single “finish”.&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;But if instrumenting parsec using&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;pin -t &amp;lt;toolname&amp;gt; -- parsecmgmt -a run -c gcc-pthreads -p canneal -i simsmall -n 8
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;We got:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;...
+
+thread:0
+
+...
+
+finish.
+
+...
+finish.
+
+(more finishes)
+
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;strong&gt;Single “thread”s and multiple “finish”.&lt;/strong&gt;&lt;/p&gt;
+
+&lt;h1 id=&quot;a-possible-explanation&quot;&gt;A Possible Explanation&lt;/h1&gt;
+
+&lt;p&gt;I assume &lt;code&gt;parsecmgmt&lt;/code&gt; dynamically search, load and run (e.g. &lt;code&gt;execv()&lt;/code&gt;, but I have not read the source code) the binary for us and PIN got lost when the true binary is run. So it only sees one threads(the entry &lt;code&gt;parsecmgmt&lt;/code&gt;) but see many exits(multi-threads’ exits of &lt;code&gt;canneal&lt;/code&gt;).&lt;/p&gt;
+
+&lt;h1 id=&quot;solution&quot;&gt;Solution&lt;/h1&gt;
+
+&lt;p&gt;Don’t call the &lt;code&gt;parsecmgmt&lt;/code&gt; binary. It’s a wrapper and does a lot of other things (e.g. untar input file) besides running the true &lt;code&gt;canneal&lt;/code&gt; for us (which also generates some useless instrumenting information).&lt;/p&gt;
+
+&lt;p&gt;Find the true binary in &lt;code&gt;pkgs/&lt;/code&gt;. For example, if we want to run the &lt;code&gt;canneal&lt;/code&gt;, the pthread version is &lt;code&gt;{parsec root}/pkgs/kernels/canneal/obj/amd64-linux.gcc-pthreads/canneal&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;For the arguments, refer to &lt;code&gt;.runconf&lt;/code&gt; files. Say we like to run with input &lt;code&gt;-i simsmall&lt;/code&gt;, open &lt;code&gt;{parsec root}/pkgs/kernels/canneal/parsec/simsmall.runconf&lt;/code&gt;. And we manually enter the arguments in it: &lt;code&gt;{$NTHREADS} 4 10000 2000 100000.nets 32&lt;/code&gt;, replacing &lt;em&gt;NTHREADS&lt;/em&gt; with thread numbers like 8.&lt;/p&gt;
+
+&lt;p&gt;The final version of &lt;em&gt;PIN&lt;/em&gt; command-line is like&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;pin -t &amp;lt;toolname&amp;gt; -- {parsec root}/pkgs/kernels/canneal/obj/amd64-linux.gcc-pthreads/canneal 8 4 10000 2000 100000.nets 32
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;It almost works except &lt;em&gt;parsec&lt;/em&gt; complains (vector out-of-range error) because it can’t find file &lt;code&gt;100000.nets&lt;/code&gt;. For &lt;code&gt;canneal&lt;/code&gt;, it’s in &lt;code&gt;{parsec root}/pkgs/kernels/canneal/inputs/input_simsmall.tar&lt;/code&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;tar -xf {parsec root}/pkgs/kernels/canneal/inputs/input_simsmall.tar
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Now &lt;code&gt;100000.nets&lt;/code&gt; is in our current directory. Run the previous command-line again and everything is good. You may want to remove the untarred file to save space.&lt;/p&gt;
+</description>
+        <pubDate>Sun, 22 Jan 2017 00:00:00 +0800</pubDate>
+        <link>http://willx8.com/2017/01/22/pin-parsec-seg-fault/</link>
+        <guid isPermaLink="true">http://willx8.com/2017/01/22/pin-parsec-seg-fault/</guid>
+        
+        <category>Pin</category>
+        
+        <category>Parsec</category>
+        
+        
+      </item>
+    
+      <item>
+        <title>Install Parsec on Ubuntu 14/16, Fix Perl Error</title>
+        <description>&lt;p&gt;&lt;a href=&quot;https://yulistic.gitlab.io/2016/05/parsec-3.0-installation-issues/&quot;&gt;A useful post to correct &lt;code&gt;smime.pod&lt;/code&gt; error.&lt;/a&gt;&lt;/p&gt;
+</description>
+        <pubDate>Sun, 22 Jan 2017 00:00:00 +0800</pubDate>
+        <link>http://willx8.com/2017/01/22/parsec-install-error-on-ubuntu14-16/</link>
+        <guid isPermaLink="true">http://willx8.com/2017/01/22/parsec-install-error-on-ubuntu14-16/</guid>
+        
+        <category>Debug</category>
+        
+        
+      </item>
     
       <item>
         <title>A Morgan Stanley Interview Recap | 一篇大摩面经</title>
